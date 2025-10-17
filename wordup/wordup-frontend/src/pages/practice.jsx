@@ -196,7 +196,7 @@ export default function Practice() {
               </Link>
               <Link 
                 to="/practice" 
-                className="text-white font-semibold border-b-2 border-purple-400 pb-1"
+                className=""
               >
                 Practice
               </Link>

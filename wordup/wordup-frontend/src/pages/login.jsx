@@ -41,9 +41,7 @@ export default function Login() {
         </h1>
         <nav className="space-x-6">
           <Link to="/" className="text-gray-600 hover:text-indigo-600 transition">Home</Link>
-          <Link to="/login" className="text-gray-600 hover:text-indigo-600 transition">Login</Link>
           <Link to="/register" className="text-gray-600 hover:text-indigo-600 transition">Register</Link>
-          <Link to="/practice" className="text-gray-600 hover:text-indigo-600 transition">Practice</Link>
         </nav>
       </header>
 
@@ -51,7 +49,7 @@ export default function Login() {
       <div className="flex items-center justify-center min-h-[calc(100vh-80px)] px-4">
         <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
           <h2 className="text-2xl font-bold text-center text-indigo-600 mb-6">
-            🔐 Login
+            Login
           </h2>
           <form onSubmit={handleLogin} className="space-y-4">
             <input
