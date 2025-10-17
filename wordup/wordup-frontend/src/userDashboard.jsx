@@ -84,29 +84,50 @@ export default function UserDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-indigo-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute -bottom-32 left-1/3 w-96 h-96 bg-violet-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style={{animationDelay: '2s'}}></div>
+      </div>
+
       {/* Navbar */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+      <header className="relative z-10 bg-white/5 backdrop-blur-md border-b border-white/10 sticky top-0 shadow-lg">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold text-xl px-3 py-2 rounded-lg">
-                W
-              </div>
+              <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
+              </svg>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">WordUP</h1>
-                <p className="text-xs text-gray-500">Your AI Speaking Coach</p>
+                <h1 className="text-xl font-black text-white">SpeakUp</h1>
+                <p className="text-xs text-gray-300">Your AI Speaking Coach</p>
               </div>
             </div>
             <nav className="flex items-center gap-6">
-              <Link to="/" className="text-gray-600 hover:text-blue-600 transition font-medium">Home</Link>
-              <Link to="/dashboard" className="text-blue-600 font-semibold border-b-2 border-blue-600 pb-1">Dashboard</Link>
-              <Link to="/practice" className="text-gray-600 hover:text-blue-600 transition font-medium">Practice</Link>
-              <Link to="/history" className="text-gray-600 hover:text-blue-600 transition font-medium">History</Link>
-              <Link to="/improve" className="text-gray-600 hover:text-blue-600 transition font-medium">Improve</Link>
+              <Link to="/" className="text-gray-300 hover:text-white transition font-medium relative group">
+                Home
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+              <Link to="/dashboard" className="text-white font-semibold border-b-2 border-purple-400 pb-1">
+                Dashboard
+              </Link>
+              <Link to="/practice" className="text-gray-300 hover:text-white transition font-medium relative group">
+                Practice
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+              <Link to="/history" className="text-gray-300 hover:text-white transition font-medium relative group">
+                History
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+              <Link to="/improve" className="text-gray-300 hover:text-white transition font-medium relative group">
+                Improve
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
+              </Link>
               <button 
                 onClick={handleLogout}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-medium"
+                className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-white rounded-full backdrop-blur-sm border border-red-400/30 transition-all duration-300 hover:scale-105 font-medium"
               >
                 Logout
               </button>
@@ -116,19 +137,16 @@ export default function UserDashboard() {
       </header>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
         {/* Welcome Hero */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-8 mb-8 text-white relative overflow-hidden">
+        <div className="bg-gradient-to-r from-purple-600 to-violet-600 rounded-2xl shadow-2xl p-8 mb-8 text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mr-32 -mt-32"></div>
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-white opacity-5 rounded-full -ml-24 -mb-24"></div>
           <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-3">
-              <span className="text-4xl">👋</span>
-              <h2 className="text-3xl font-bold">
-                Welcome back, {user?.name || 'User'}!
-              </h2>
-            </div>
-            <p className="text-blue-100 text-lg">
+            <h2 className="text-4xl font-black mb-3">
+              Welcome back, {user?.name || 'User'}!
+            </h2>
+            <p className="text-purple-100 text-lg font-light">
               Ready to level up your English fluency today?
             </p>
           </div>
@@ -137,67 +155,66 @@ export default function UserDashboard() {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Total Speeches */}
-          <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-gray-100">
-            <div className="flex items-start justify-between mb-4">
-              <div className="bg-blue-100 rounded-xl p-3">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">Speeches</span>
-            </div>
-            <p className="text-4xl font-bold text-gray-900 mb-1">{totalSpeeches}</p>
-            <p className="text-sm text-gray-500">Total speeches created</p>
-          </div>
-
-          {/* Practice Sessions */}
-          <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-gray-100">
-            <div className="flex items-start justify-between mb-4">
-              <div className="bg-green-100 rounded-xl p-3">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                </svg>
-              </div>
-              <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">Sessions</span>
-            </div>
-            <p className="text-4xl font-bold text-gray-900 mb-1">{practiceCount}</p>
-            <p className="text-sm text-gray-500">Practice sessions completed</p>
-          </div>
-
-          {/* This Week */}
-          <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-gray-100">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 hover:shadow-purple-500/30 transition-all duration-300 hover:scale-105">
             <div className="flex items-start justify-between mb-4">
               <div className="bg-purple-100 rounded-xl p-3">
                 <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <span className="text-xs font-bold text-purple-600 bg-purple-50 px-3 py-1 rounded-full">Speeches</span>
+            </div>
+            <p className="text-5xl font-black text-gray-900 mb-1">{totalSpeeches}</p>
+            <p className="text-sm text-gray-600 font-medium">Total speeches created</p>
+          </div>
+
+          {/* Practice Sessions */}
+          <div className="bg-white rounded-2xl shadow-2xl p-6 hover:shadow-violet-500/30 transition-all duration-300 hover:scale-105">
+            <div className="flex items-start justify-between mb-4">
+              <div className="bg-violet-100 rounded-xl p-3">
+                <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                </svg>
+              </div>
+              <span className="text-xs font-bold text-violet-600 bg-violet-50 px-3 py-1 rounded-full">Sessions</span>
+            </div>
+            <p className="text-5xl font-black text-gray-900 mb-1">{practiceCount}</p>
+            <p className="text-sm text-gray-600 font-medium">Practice sessions completed</p>
+          </div>
+
+          {/* This Week */}
+          <div className="bg-white rounded-2xl shadow-2xl p-6 hover:shadow-indigo-500/30 transition-all duration-300 hover:scale-105">
+            <div className="flex items-start justify-between mb-4">
+              <div className="bg-indigo-100 rounded-xl p-3">
+                <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                 </svg>
               </div>
-              <span className="text-xs font-semibold text-purple-600 bg-purple-50 px-2 py-1 rounded-full">This Week</span>
+              <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">This Week</span>
             </div>
-            <p className="text-4xl font-bold text-gray-900 mb-1">
+            <p className="text-5xl font-black text-gray-900 mb-1">
               {speeches.filter(s => {
                 const weekAgo = new Date();
                 weekAgo.setDate(weekAgo.getDate() - 7);
                 return new Date(s.createdAt) > weekAgo;
               }).length}
             </p>
-            <p className="text-sm text-gray-500">Speeches this week</p>
+            <p className="text-sm text-gray-600 font-medium">Speeches this week</p>
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100">
-          <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <span className="text-2xl">⚡</span>
+        <div className="bg-white rounded-2xl shadow-2xl p-8 mb-8">
+          <h3 className="text-2xl font-black text-gray-900 mb-6">
             Quick Actions
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Link
               to="/improve"
-              className="group relative bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-blue-100"
+              className="group relative bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300 hover:scale-105 border border-purple-200"
             >
               <div className="flex items-center gap-4">
-                <div className="bg-blue-600 text-white rounded-lg p-3 group-hover:scale-110 transition-transform">
+                <div className="bg-purple-600 text-white rounded-lg p-3 group-hover:scale-110 transition-transform">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
@@ -211,10 +228,10 @@ export default function UserDashboard() {
 
             <Link
               to="/practice"
-              className="group relative bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-green-100"
+              className="group relative bg-gradient-to-br from-violet-50 to-violet-100 rounded-xl p-6 hover:shadow-xl hover:shadow-violet-500/20 transition-all duration-300 hover:scale-105 border border-violet-200"
             >
               <div className="flex items-center gap-4">
-                <div className="bg-green-600 text-white rounded-lg p-3 group-hover:scale-110 transition-transform">
+                <div className="bg-violet-600 text-white rounded-lg p-3 group-hover:scale-110 transition-transform">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                   </svg>
@@ -228,10 +245,10 @@ export default function UserDashboard() {
 
             <Link
               to="/history"
-              className="group relative bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-purple-100"
+              className="group relative bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-6 hover:shadow-xl hover:shadow-indigo-500/20 transition-all duration-300 hover:scale-105 border border-indigo-200"
             >
               <div className="flex items-center gap-4">
-                <div className="bg-purple-600 text-white rounded-lg p-3 group-hover:scale-110 transition-transform">
+                <div className="bg-indigo-600 text-white rounded-lg p-3 group-hover:scale-110 transition-transform">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -245,10 +262,10 @@ export default function UserDashboard() {
 
             <Link
               to="/speeches"
-              className="group relative bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-orange-100"
+              className="group relative bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl p-6 hover:shadow-xl hover:shadow-pink-500/20 transition-all duration-300 hover:scale-105 border border-pink-200"
             >
               <div className="flex items-center gap-4">
-                <div className="bg-orange-600 text-white rounded-lg p-3 group-hover:scale-110 transition-transform">
+                <div className="bg-pink-600 text-white rounded-lg p-3 group-hover:scale-110 transition-transform">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                   </svg>
@@ -263,13 +280,12 @@ export default function UserDashboard() {
         </div>
 
         {/* Recent Speeches */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+        <div className="bg-white rounded-2xl shadow-2xl p-8">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-              <span className="text-2xl">📚</span>
+            <h3 className="text-2xl font-black text-gray-900">
               Recent Speeches
             </h3>
-            <Link to="/speeches" className="text-blue-600 hover:text-blue-700 font-semibold text-sm flex items-center gap-1">
+            <Link to="/speeches" className="text-purple-600 hover:text-purple-700 font-bold text-sm flex items-center gap-1 hover:gap-2 transition-all">
               View All
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -279,22 +295,22 @@ export default function UserDashboard() {
 
           {loading ? (
             <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-              <p className="text-gray-500 mt-4">Loading your speeches...</p>
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+              <p className="text-gray-600 mt-4 font-medium">Loading your speeches...</p>
             </div>
           ) : error ? (
             <div className="text-center py-12">
-              <span className="text-6xl mb-4 block">⚠️</span>
-              <p className="text-red-500">{error}</p>
+              <div className="text-red-500 text-5xl mb-4">⚠</div>
+              <p className="text-red-500 font-semibold">{error}</p>
             </div>
           ) : recentSpeeches.length === 0 ? (
             <div className="text-center py-16">
-              <span className="text-6xl mb-4 block">🎯</span>
-              <p className="text-gray-600 text-lg mb-2 font-semibold">Start Your Journey</p>
-              <p className="text-gray-500 mb-6">Create your first speech and begin improving your English fluency</p>
+              <div className="text-gray-400 text-6xl mb-4">📝</div>
+              <p className="text-gray-700 text-lg mb-2 font-bold">Start Your Journey</p>
+              <p className="text-gray-600 mb-6">Create your first speech and begin improving your English fluency</p>
               <Link
                 to="/improve"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition font-semibold shadow-lg"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-full hover:from-purple-700 hover:to-violet-700 transition font-bold shadow-xl hover:shadow-2xl hover:scale-105"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -307,11 +323,11 @@ export default function UserDashboard() {
               {recentSpeeches.map((speech) => (
                 <div
                   key={speech._id}
-                  className="group flex items-center justify-between p-5 border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all duration-300 bg-gradient-to-r from-white to-gray-50"
+                  className="group flex items-center justify-between p-5 border-2 border-gray-100 rounded-xl hover:border-purple-300 hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-white to-gray-50"
                 >
                   <div className="flex-1">
-                    <h4 className="font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition">{speech.title}</h4>
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <h4 className="font-bold text-gray-900 mb-1 text-lg group-hover:text-purple-600 transition">{speech.title}</h4>
+                    <div className="flex items-center gap-4 text-sm text-gray-600">
                       <span className="flex items-center gap-1">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -329,20 +345,20 @@ export default function UserDashboard() {
                   <div className="flex gap-2">
                     <Link
                       to={`/speeches/${speech._id}`}
-                      className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-medium"
+                      className="px-5 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-semibold"
                     >
                       View
                     </Link>
                     <Link
                       to="/practice"
                       state={{ preloadedSpeech: speech.improvedVersion || speech.originalDraft, speechId: speech._id }}
-                      className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition font-medium shadow-md"
+                      className="px-5 py-2 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-lg hover:from-purple-700 hover:to-violet-700 transition font-semibold shadow-md"
                     >
                       Practice
                     </Link>
                     <button 
                       onClick={() => downloadPDF(speech)}
-                      className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-medium"
+                      className="px-5 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition font-semibold"
                     >
                       PDF
                     </button>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function SpeechImprover() {
@@ -10,8 +10,21 @@ export default function SpeechImprover() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [savedSpeechId, setSavedSpeechId] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setIsLoggedIn(false);
+    navigate("/login");
+  };
 
   const analyzeSpeech = async () => {
     if (!originalDraft.trim()) {
@@ -24,8 +37,7 @@ export default function SpeechImprover() {
     setAiSuggestions("🤖 AI is analyzing your speech...");
 
     try {
-      // Call Cohere AI to analyze speech
-      const COHERE_API_KEY = "vZ6eRMVEtY8tSCzkqepuPoMPznKZlFvHFm4JUsYE"; // Replace with your key
+      const COHERE_API_KEY = "vZ6eRMVEtY8tSCzkqepuPoMPznKZlFvHFm4JUsYE";
       
       const response = await fetch('https://api.cohere.ai/v1/chat', {
         method: 'POST',
@@ -134,34 +146,115 @@ Format your response with clear sections and make it encouraging.`,
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-indigo-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute -bottom-32 left-1/3 w-96 h-96 bg-violet-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style={{animationDelay: '2s'}}></div>
+      </div>
+
       {/* Navbar */}
-      <header className="flex justify-between items-center px-10 py-6 bg-white shadow">
-        <h1 className="text-2xl font-extrabold text-indigo-700">
-          ✍️ SpeakUp
+      <header className="relative z-10 flex justify-between items-center px-10 py-6 bg-white/5 backdrop-blur-md border-b border-white/10 shadow-lg">
+        <h1 className="text-3xl font-black text-white flex items-center gap-3 hover:scale-105 transition-transform duration-300">
+          <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
+          </svg>
+          <span className="bg-gradient-to-r from-white to-purple-300 bg-clip-text text-transparent">
+            SpeakUp
+          </span>
         </h1>
-        <nav className="space-x-6">
-          <Link to="/" className="text-gray-600 hover:text-indigo-600 transition">Home</Link>
-          <Link to="/login" className="text-gray-600 hover:text-indigo-600 transition">Login</Link>
-          <Link to="/register" className="text-gray-600 hover:text-indigo-600 transition">Register</Link>
-          <Link to="/practice" className="text-gray-600 hover:text-indigo-600 transition">Practice</Link>
-          <Link to="/improve" className="text-indigo-600 font-bold transition">Improve Speech</Link>
+        <nav className="flex items-center space-x-8">
+          <Link 
+            to="/" 
+            className="text-gray-300 hover:text-white font-medium transition-all duration-300 hover:scale-110 relative group"
+          >
+            Home
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
+          </Link>
+          
+          {isLoggedIn ? (
+            <>
+              <Link 
+                to="/dashboard" 
+                className="text-gray-300 hover:text-white font-medium transition-all duration-300 hover:scale-110 relative group"
+              >
+                Dashboard
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+              <Link 
+                to="/practice" 
+                className="text-gray-300 hover:text-white font-medium transition-all duration-300 hover:scale-110 relative group"
+              >
+                Practice
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+              <Link 
+                to="/history" 
+                className="text-gray-300 hover:text-white font-medium transition-all duration-300 hover:scale-110 relative group"
+              >
+                History
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+              <Link 
+                to="/improve" 
+                className="text-white font-semibold border-b-2 border-purple-400 pb-1"
+              >
+                Improve
+              </Link>
+              <button 
+                onClick={handleLogout}
+                className="px-6 py-2 bg-red-500/20 hover:bg-red-500/30 text-white rounded-full backdrop-blur-sm border border-red-400/30 transition-all duration-300 hover:scale-105 font-medium"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link 
+                to="/login" 
+                className="text-gray-300 hover:text-white font-medium transition-all duration-300 hover:scale-110 relative group"
+              >
+                Login
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+              <Link 
+                to="/register" 
+                className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-105 font-medium"
+              >
+                Register
+              </Link>
+              <Link 
+                to="/improve" 
+                className="text-white font-semibold border-b-2 border-purple-400 pb-1"
+              >
+                Improve
+              </Link>
+            </>
+          )}
         </nav>
       </header>
 
       {/* Main Content */}
-      <div className="flex items-center justify-center min-h-[calc(100vh-80px)] px-4 py-8">
-        <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl p-10 border border-gray-100">
-          <h2 className="text-4xl font-extrabold text-center text-indigo-700 mb-2">
-            ✍️ Speech Improver
-          </h2>
-          <p className="text-center text-gray-500 mb-8">
-            Write your speech draft and get AI-powered suggestions to improve it
-          </p>
+      <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-80px)] px-4 py-8">
+        <div className="w-full max-w-5xl bg-white rounded-3xl shadow-2xl p-10">
+          <div className="text-center mb-8">
+            <h2 className="text-5xl font-black text-gray-900 mb-3">
+              <span className="bg-gradient-to-r from-purple-600 to-violet-600 bg-clip-text text-transparent">
+                Speech Improver
+              </span>
+            </h2>
+            <p className="text-gray-600 text-lg">
+              Write your speech draft and get AI-powered suggestions to improve it
+            </p>
+          </div>
 
           {/* Title Input */}
           <div className="mb-6">
-            <label className="block text-gray-700 font-bold mb-2">
+            <label className="block text-gray-800 font-bold mb-2 flex items-center gap-2">
+              <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+              </svg>
               Speech Title:
             </label>
             <input
@@ -169,13 +262,16 @@ Format your response with clear sections and make it encouraging.`,
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g., My Speech About Climate Change"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
             />
           </div>
 
           {/* Original Draft */}
           <div className="mb-6">
-            <label className="block text-gray-700 font-bold mb-2">
+            <label className="block text-gray-800 font-bold mb-2 flex items-center gap-2">
+              <svg className="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
               Your Draft Speech:
             </label>
             <textarea
@@ -183,43 +279,75 @@ Format your response with clear sections and make it encouraging.`,
               onChange={(e) => setOriginalDraft(e.target.value)}
               placeholder="Paste or type your speech here..."
               rows="10"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none transition-all"
             />
-            <p className="text-sm text-gray-500 mt-2">
-              Word count: {originalDraft.trim().split(/\s+/).filter(w => w).length}
-            </p>
+            <div className="flex items-center justify-between mt-2">
+              <p className="text-sm text-gray-600 font-medium">
+                Word count: <span className="text-purple-600 font-bold">{originalDraft.trim().split(/\s+/).filter(w => w).length}</span>
+              </p>
+            </div>
           </div>
 
           {/* Analyze Button */}
           <button
             onClick={analyzeSpeech}
             disabled={loading || !originalDraft.trim()}
-            className="w-full px-6 py-4 bg-indigo-600 text-white rounded-lg shadow-lg hover:bg-indigo-700 transition text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed mb-6"
+            className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-xl shadow-xl hover:from-purple-700 hover:to-violet-700 transition-all text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed mb-6 hover:scale-[1.02] transform disabled:transform-none flex items-center justify-center gap-2"
           >
-            {loading ? '⏳ Analyzing...' : '🤖 Analyze & Improve'}
+            {loading ? (
+              <>
+                <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Analyzing...
+              </>
+            ) : (
+              <>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                Analyze & Improve
+              </>
+            )}
           </button>
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-600">⚠️ {error}</p>
+            <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-xl animate-pulse">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                <p className="text-red-600 font-semibold">{error}</p>
+              </div>
             </div>
           )}
 
           {/* Success Message */}
           {success && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-green-600">✅ Speech saved successfully!</p>
+            <div className="mb-6 p-4 bg-green-50 border-2 border-green-200 rounded-xl">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <p className="text-green-600 font-semibold">Speech saved successfully!</p>
+              </div>
             </div>
           )}
 
           {/* AI Suggestions */}
           {aiSuggestions && (
             <div className="mb-6">
-              <h3 className="text-xl font-bold text-gray-700 mb-2">
-                💡 AI Analysis & Suggestions:
-              </h3>
-              <pre className="p-4 bg-gray-50 rounded-lg text-gray-700 shadow-inner min-h-[200px] whitespace-pre-wrap font-sans text-sm overflow-auto max-h-[500px]">
+              <div className="flex items-center gap-2 mb-3">
+                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                <h3 className="text-xl font-black text-gray-900">
+                  AI Analysis & Suggestions
+                </h3>
+              </div>
+              <pre className="p-6 bg-gradient-to-br from-purple-50 to-violet-50 rounded-2xl text-gray-700 shadow-inner min-h-[200px] whitespace-pre-wrap font-sans text-sm overflow-auto max-h-[500px] border-2 border-purple-200 leading-relaxed">
                 {aiSuggestions}
               </pre>
             </div>
@@ -230,15 +358,21 @@ Format your response with clear sections and make it encouraging.`,
             <div className="flex gap-4">
               <button
                 onClick={saveSpeech}
-                className="flex-1 px-6 py-3 bg-green-500 text-white rounded-lg shadow-lg hover:bg-green-600 transition text-lg font-semibold"
+                className="flex-1 px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl shadow-xl hover:from-green-600 hover:to-emerald-600 transition-all text-lg font-bold hover:scale-[1.02] transform flex items-center justify-center gap-2"
               >
-                💾 Save Speech
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                </svg>
+                Save Speech
               </button>
               <button
                 onClick={practiceNow}
-                className="flex-1 px-6 py-3 bg-indigo-500 text-white rounded-lg shadow-lg hover:bg-indigo-600 transition text-lg font-semibold"
+                className="flex-1 px-6 py-4 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-xl shadow-xl hover:from-purple-700 hover:to-violet-700 transition-all text-lg font-bold hover:scale-[1.02] transform flex items-center justify-center gap-2"
               >
-                🎤 Practice Now
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
+                </svg>
+                Practice Now
               </button>
             </div>
           )}

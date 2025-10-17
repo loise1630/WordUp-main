@@ -6,67 +6,173 @@ export default function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is logged in
     const token = localStorage.getItem("token");
     setIsLoggedIn(!!token);
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setIsLoggedIn(false);
     navigate("/login");
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 flex flex-col">
-      {/* Navbar */}
-      <header className="flex justify-between items-center px-10 py-6 bg-white shadow">
-        <h1 className="text-2xl font-extrabold text-indigo-700 flex items-center gap-2">
-          🎤 SpeakUp
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 flex flex-col relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-indigo-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute -bottom-32 left-1/3 w-96 h-96 bg-violet-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style={{animationDelay: '2s'}}></div>
+      </div>
+
+      {/* Navbar with Glassmorphism */}
+      <header className="relative z-10 flex justify-between items-center px-10 py-6 bg-white/5 backdrop-blur-md border-b border-white/10 shadow-lg">
+        <h1 className="text-3xl font-black text-white flex items-center gap-3 hover:scale-105 transition-transform duration-300">
+          <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
+          </svg>
+          <span className="bg-gradient-to-r from-white to-purple-300 bg-clip-text text-transparent">
+            SpeakUp
+          </span>
         </h1>
-        <nav className="space-x-6">
-          <Link to="/" className="text-gray-600 hover:text-indigo-600 transition">Home</Link>
+        <nav className="flex items-center space-x-8">
+          <Link 
+            to="/" 
+            className="text-gray-300 hover:text-white font-medium transition-all duration-300 hover:scale-110 relative group"
+          >
+            Home
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
+          </Link>
           
           {isLoggedIn ? (
             <>
-              <Link to="/dashboard" className="text-gray-600 hover:text-indigo-600 transition">Dashboard</Link>
-              <Link to="/practice" className="text-gray-600 hover:text-indigo-600 transition">Practice</Link>
+              <Link 
+                to="/dashboard" 
+                className="text-gray-300 hover:text-white font-medium transition-all duration-300 hover:scale-110 relative group"
+              >
+                Dashboard
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+              <Link 
+                to="/practice" 
+                className="text-gray-300 hover:text-white font-medium transition-all duration-300 hover:scale-110 relative group"
+              >
+                Practice
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+              <Link 
+                to="/history" 
+                className="text-gray-300 hover:text-white font-medium transition-all duration-300 hover:scale-110 relative group"
+              >
+                History
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+              <Link 
+                to="/improve" 
+                className="text-gray-300 hover:text-white font-medium transition-all duration-300 hover:scale-110 relative group"
+              >
+                Improve
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
+              </Link>
               <button 
                 onClick={handleLogout}
-                className="text-gray-600 hover:text-red-600 transition"
+                className="px-6 py-2 bg-red-500/20 hover:bg-red-500/30 text-white rounded-full backdrop-blur-sm border border-red-400/30 transition-all duration-300 hover:scale-105 font-medium"
               >
                 Logout
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" className="text-gray-600 hover:text-indigo-600 transition">Login</Link>
-              <Link to="/register" className="text-gray-600 hover:text-indigo-600 transition">Register</Link>
-              <Link to="/practice" className="text-gray-600 hover:text-indigo-600 transition">Practice</Link>
+              <Link 
+                to="/login" 
+                className="text-gray-300 hover:text-white font-medium transition-all duration-300 hover:scale-110 relative group"
+              >
+                Login
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+              <Link 
+                to="/register" 
+                className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-105 font-medium"
+              >
+                Register
+              </Link>
+              <Link 
+                to="/practice" 
+                className="text-gray-300 hover:text-white font-medium transition-all duration-300 hover:scale-110 relative group"
+              >
+                Practice
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
+              </Link>
             </>
           )}
         </nav>
       </header>
 
       {/* Hero Section */}
-      <main className="flex flex-1 flex-col items-center justify-center text-center px-6">
-        <h2 className="text-5xl font-extrabold text-indigo-700 mb-4">
-          Master Public Speaking with AI Coaching
-        </h2>
-        <p className="text-lg text-gray-600 max-w-2xl mb-8">
-          Practice your speeches, get instant feedback, and build confidence in your English communication skills.
-        </p>
+      <main className="relative z-10 flex flex-1 flex-col items-center justify-center text-center px-6 py-20">
+        <div className="max-w-5xl mx-auto space-y-8">
+          <h2 className="text-7xl font-black text-white mb-6 leading-tight">
+            Master Public Speaking
+            <br />
+            <span className="bg-gradient-to-r from-purple-400 via-violet-400 to-indigo-400 bg-clip-text text-transparent">
+              with AI Coaching
+            </span>
+          </h2>
+          
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed font-light">
+            Practice your speeches, get instant feedback, and build confidence in your English communication skills.
+          </p>
 
-        <Link
-          to="/practice"
-          className="px-8 py-3 bg-indigo-600 text-white text-lg rounded-lg shadow-lg hover:bg-indigo-700 transition"
-        >
-          🚀 Start Practicing
-        </Link>
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mt-12">
+            <Link
+              to="/practice"
+              className="group relative px-10 py-5 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white text-lg font-bold rounded-full shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-110"
+            >
+              Start Practicing
+            </Link>
+            
+            {!isLoggedIn && (
+              <Link
+                to="/register"
+                className="px-10 py-5 bg-white/5 backdrop-blur-sm text-white text-lg font-bold rounded-full border-2 border-white/20 hover:bg-white/10 hover:border-white/30 transition-all duration-300 hover:scale-110 shadow-xl"
+              >
+                Create Free Account
+              </Link>
+            )}
+          </div>
+
+          {/* Feature Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-20 max-w-6xl mx-auto">
+            <div className="bg-white rounded-3xl p-8 shadow-2xl hover:shadow-purple-500/30 transition-all duration-300 hover:scale-105 group">
+              <svg className="w-16 h-16 mb-4 text-purple-600 group-hover:scale-110 transition-transform duration-300 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">AI Feedback</h3>
+              <p className="text-gray-600">Get instant, personalized feedback on your speaking performance</p>
+            </div>
+            
+            <div className="bg-white rounded-3xl p-8 shadow-2xl hover:shadow-violet-500/30 transition-all duration-300 hover:scale-105 group">
+              <svg className="w-16 h-16 mb-4 text-violet-600 group-hover:scale-110 transition-transform duration-300 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Track Progress</h3>
+              <p className="text-gray-600">Monitor your improvement with detailed analytics and insights</p>
+            </div>
+            
+            <div className="bg-white rounded-3xl p-8 shadow-2xl hover:shadow-indigo-500/30 transition-all duration-300 hover:scale-105 group">
+              <svg className="w-16 h-16 mb-4 text-indigo-600 group-hover:scale-110 transition-transform duration-300 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Build Confidence</h3>
+              <p className="text-gray-600">Practice in a safe environment and boost your public speaking skills</p>
+            </div>
+          </div>
+        </div>
       </main>
 
       {/* Footer */}
-      <footer className="text-center py-4 text-gray-500 text-sm">
+      <footer className="relative z-10 text-center py-6 text-gray-500 text-sm border-t border-white/10 bg-black/30 backdrop-blur-sm">
         © {new Date().getFullYear()} SpeakUp. All rights reserved.
       </footer>
     </div>
