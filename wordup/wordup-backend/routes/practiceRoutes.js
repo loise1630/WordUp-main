@@ -11,9 +11,12 @@ router.post("/save", authMiddleware, (req, res) => {
   try {
     const { transcript, feedback, wordCount, sentenceCount } = req.body;
     
+    // Handle different token formats
+    const userId = req.user.id || req.user.userId || req.user._id;
+    
     const session = {
       id: Date.now(),
-      userId: req.user.id,
+      userId: userId,
       transcript,
       feedback,
       wordCount,
@@ -29,6 +32,7 @@ router.post("/save", authMiddleware, (req, res) => {
       session,
     });
   } catch (error) {
+    console.error("❌ Save Error:", error);
     res.status(500).json({
       success: false,
       message: "Error saving practice session",
@@ -40,15 +44,24 @@ router.post("/save", authMiddleware, (req, res) => {
 // Get user's practice history
 router.get("/history", authMiddleware, (req, res) => {
   try {
+    // Handle different token formats
+    const userId = req.user.id || req.user.userId || req.user._id;
+    
+    console.log("🔍 User ID:", userId);
+    console.log("📊 Total sessions:", practiceHistory.length);
+    
     const userSessions = practiceHistory.filter(
-      (session) => session.userId === req.user.id
+      (session) => session.userId === userId
     );
+
+    console.log("✅ User sessions found:", userSessions.length);
 
     res.json({
       success: true,
       sessions: userSessions.reverse(),
     });
   } catch (error) {
+    console.error("❌ History Error:", error);
     res.status(500).json({
       success: false,
       message: "Error fetching practice history",
@@ -61,8 +74,10 @@ router.get("/history", authMiddleware, (req, res) => {
 router.delete("/delete/:id", authMiddleware, (req, res) => {
   try {
     const sessionId = parseInt(req.params.id);
+    const userId = req.user.id || req.user.userId || req.user._id;
+    
     const index = practiceHistory.findIndex(
-      (session) => session.id === sessionId && session.userId === req.user.id
+      (session) => session.id === sessionId && session.userId === userId
     );
 
     if (index === -1) {
@@ -79,6 +94,7 @@ router.delete("/delete/:id", authMiddleware, (req, res) => {
       message: "Session deleted successfully",
     });
   } catch (error) {
+    console.error("❌ Delete Error:", error);
     res.status(500).json({
       success: false,
       message: "Error deleting session",

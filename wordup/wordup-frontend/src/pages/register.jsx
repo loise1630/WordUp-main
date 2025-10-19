@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export default function Register() {
@@ -8,6 +8,9 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("user");
   const [message, setMessage] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  
+  const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -19,9 +22,15 @@ export default function Register() {
         role,
       });
       setMessage("✅ " + res.data.message);
+      setShowSuccessModal(true);
     } catch (err) {
       setMessage("❌ " + (err.response?.data?.message || "Error registering"));
     }
+  };
+
+  const handleGoToLogin = () => {
+    setShowSuccessModal(false);
+    navigate('/login');
   };
 
   return (
@@ -40,7 +49,7 @@ export default function Register() {
             <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
           </svg>
           <span className="bg-gradient-to-r from-white to-purple-300 bg-clip-text text-transparent">
-            SpeakUp
+            WordUP
           </span>
         </h1>
         <nav className="flex items-center space-x-8">
@@ -73,7 +82,7 @@ export default function Register() {
             <h2 className="text-3xl font-black text-gray-900 mb-2">
               Create Account
             </h2>
-            <p className="text-gray-600">Join SpeakUp and start improving your skills</p>
+            <p className="text-gray-600">Join WordUP and start improving your skills</p>
           </div>
 
           <form onSubmit={handleRegister} className="space-y-5">
@@ -148,7 +157,7 @@ export default function Register() {
             </button>
           </form>
 
-          {message && (
+          {message && !showSuccessModal && (
             <div className={`mt-4 p-4 rounded-xl ${
               message.includes('✅') 
                 ? 'bg-green-50 border-2 border-green-200' 
@@ -175,6 +184,86 @@ export default function Register() {
           </div>
         </div>
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 transform animate-scaleIn">
+            {/* Success Icon */}
+            <div className="flex justify-center mb-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center animate-bounce">
+                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Success Message */}
+            <div className="text-center mb-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                Registration Successful!
+              </h3>
+              <p className="text-gray-600 text-lg">
+                Welcome to <span className="font-bold text-purple-600">WordUP</span>!
+              </p>
+              <p className="text-gray-500 mt-2">
+                Your account has been created successfully. Let's get you started on your English fluency journey!
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-3">
+              <button
+                onClick={handleGoToLogin}
+                className="w-full bg-gradient-to-r from-purple-600 to-violet-600 text-white py-4 rounded-xl hover:from-purple-700 hover:to-violet-700 transition-all font-bold text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] transform flex items-center justify-center gap-2"
+              >
+                Go to Login
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </button>
+              
+              <button
+                onClick={() => setShowSuccessModal(false)}
+                className="w-full bg-gray-100 text-gray-700 py-3 rounded-xl hover:bg-gray-200 transition-all font-semibold"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add animations to your CSS or in a <style> tag */}
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes scaleIn {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
+        }
+
+        .animate-scaleIn {
+          animation: scaleIn 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 }

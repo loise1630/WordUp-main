@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getAIFeedback } from "../services/aiFeedback";
+import axios from "axios";
 
 export default function Practice() {
   const [transcript, setTranscript] = useState("");
@@ -8,6 +9,11 @@ export default function Practice() {
   const [isListening, setIsListening] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [showSaveButton, setShowSaveButton] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
+  const [sessionData, setSessionData] = useState(null);
+  
   const recognitionRef = useRef(null);
   const transcriptRef = useRef("");
   const navigate = useNavigate();
@@ -74,6 +80,8 @@ export default function Practice() {
     transcriptRef.current = "";
     setTranscript("");
     setFeedback("");
+    setShowSaveButton(false);
+    setSaveMessage("");
   };
 
   const stopRecording = () => {
@@ -105,13 +113,76 @@ export default function Practice() {
         feedbackText += result.feedback;
         
         setFeedback(feedbackText);
+        
+        // Store session data for saving
+        setSessionData({
+          transcript: text,
+          aiFeedback: feedbackText,
+          scores: {
+            wordCount,
+            characterCount: charCount,
+            sentenceCount
+          }
+        });
+        
+        setShowSaveButton(true);
       } else {
-        setFeedback(`⚠️ AI analysis unavailable: ${result.error}\n\nShowing basic analysis:\n\n📊 Word count: ${wordCount}\n📝 Sentences: ${sentenceCount}`);
+        const feedbackText = `⚠️ AI analysis unavailable: ${result.error}\n\nShowing basic analysis:\n\n📊 Word count: ${wordCount}\n📝 Sentences: ${sentenceCount}`;
+        setFeedback(feedbackText);
+        
+        setSessionData({
+          transcript: text,
+          aiFeedback: feedbackText,
+          scores: {
+            wordCount,
+            characterCount: charCount,
+            sentenceCount
+          }
+        });
+        
+        setShowSaveButton(true);
       }
 
     } catch (error) {
       console.error("Analysis error:", error);
       setFeedback("❌ Error analyzing speech: " + error.message);
+    }
+  };
+
+  const saveSession = async () => {
+    if (!sessionData) return;
+    
+    setIsSaving(true);
+    setSaveMessage("");
+
+    try {
+      const token = localStorage.getItem('token');
+      
+      const response = await axios.post(
+        'http://localhost:5000/api/practice',
+        sessionData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+
+      if (response.data.success) {
+        setSaveMessage("✅ Session saved successfully!");
+        setShowSaveButton(false);
+        
+        // Clear after 3 seconds
+        setTimeout(() => {
+          setSaveMessage("");
+        }, 3000);
+      }
+
+    } catch (error) {
+      console.error('Error saving session:', error);
+      setSaveMessage("❌ Failed to save session: " + (error.response?.data?.error || error.message));
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -131,7 +202,7 @@ export default function Practice() {
             <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
           </svg>
           <span className="bg-gradient-to-r from-white to-purple-300 bg-clip-text text-transparent">
-            SpeakUp
+            WordUP
           </span>
         </h1>
         <nav className="flex items-center space-x-8">
@@ -196,7 +267,7 @@ export default function Practice() {
               </Link>
               <Link 
                 to="/practice" 
-                className=""
+                className="text-white font-semibold border-b-2 border-purple-400 pb-1"
               >
                 Practice
               </Link>
@@ -256,7 +327,7 @@ export default function Practice() {
           <div className="text-center mb-8">
             <h2 className="text-5xl font-black text-gray-900 mb-3">
               <span className="bg-gradient-to-r from-purple-600 to-violet-600 bg-clip-text text-transparent">
-                SpeakUp Coach
+                WordUP Coach
               </span>
             </h2>
             <p className="text-gray-600 text-lg">
@@ -328,6 +399,29 @@ export default function Practice() {
                   </svg>
                   Speak now... I'm listening!
                 </p>
+              </div>
+            )}
+
+            {/* 🎯 SAVE BUTTON - Shows after analysis */}
+            {showSaveButton && (
+              <div className="flex flex-col items-center gap-2 mt-4">
+                <button
+                  onClick={saveSession}
+                  disabled={isSaving}
+                  className="px-8 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-full shadow-lg hover:from-blue-600 hover:to-indigo-600 transition-all text-base font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 transform flex items-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                  </svg>
+                  {isSaving ? "Saving..." : "Save Session to History"}
+                </button>
+                {saveMessage && (
+                  <p className={`text-sm font-semibold ${
+                    saveMessage.includes('✅') ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {saveMessage}
+                  </p>
+                )}
               </div>
             )}
           </div>
