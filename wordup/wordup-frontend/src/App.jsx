@@ -3,12 +3,13 @@ import Home from "./pages/home";
 import Practice from "./pages/practice";
 import Login from "./pages/login";
 import Register from "./pages/register";
-import SpeechImprover from './speechImprover';
-import UserDashboard from './userDashboard';
-import AdminDashboard from "./adminDashboard";
-import SpeechDetail from './speechDetail';
-import SavedSpeeches from './savedSpeeches';
-import PracticeHistory from "./pages/practiceHistory"; // ✅ Removed .jsx extension
+import SpeechImprover from './pages/speechImprover';
+import UserDashboard from './pages/userDashboard';
+import AdminDashboard from "./pages/adminDashboard";
+import SpeechDetail from './pages/speechDetail';
+import SavedSpeeches from './pages/savedSpeeches';
+import PracticeHistory from "./pages/practiceHistory";
+
 
 export default function App() {
   return (

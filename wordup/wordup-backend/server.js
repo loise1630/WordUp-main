@@ -28,22 +28,16 @@ mongoose.connect(process.env.DB_URI, {
 
 // Routes
 console.log('📋 Registering routes...');
-
 app.use("/auth", authRoutes);
 console.log('  ✓ Auth routes: /auth');
-
 app.use("/speech", speechRoutes);
 console.log('  ✓ Speech routes: /speech');
-
 app.use("/api/audio", audioRoutes);
 console.log('  ✓ Audio routes: /api/audio');
-
 app.use("/admin", adminRoutes);
 console.log('  ✓ Admin routes: /admin');
-
 app.use('/api/practice', practiceRoutes);
 console.log('  ✓ Practice routes: /api/practice');
-
 console.log('✅ All routes registered!\n');
 
 // Root route

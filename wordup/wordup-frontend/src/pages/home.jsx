@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import Header from '../components/Header';
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -26,89 +27,8 @@ export default function Home() {
         <div className="absolute -bottom-32 left-1/3 w-96 h-96 bg-violet-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style={{animationDelay: '2s'}}></div>
       </div>
 
-      {/* Navbar with Glassmorphism */}
-      <header className="relative z-10 flex justify-between items-center px-10 py-6 bg-white/5 backdrop-blur-md border-b border-white/10 shadow-lg">
-        <h1 className="text-3xl font-black text-white flex items-center gap-3 hover:scale-105 transition-transform duration-300">
-          <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
-          </svg>
-          <span className="bg-gradient-to-r from-white to-purple-300 bg-clip-text text-transparent">
-            SpeakUp
-          </span>
-        </h1>
-        <nav className="flex items-center space-x-8">
-          <Link 
-            to="/" 
-            className="text-gray-300 hover:text-white font-medium transition-all duration-300 hover:scale-110 relative group"
-          >
-            Home
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
-          </Link>
-          
-          {isLoggedIn ? (
-            <>
-              <Link 
-                to="/dashboard" 
-                className="text-gray-300 hover:text-white font-medium transition-all duration-300 hover:scale-110 relative group"
-              >
-                Dashboard
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
-              </Link>
-              <Link 
-                to="/practice" 
-                className="text-gray-300 hover:text-white font-medium transition-all duration-300 hover:scale-110 relative group"
-              >
-                Practice
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
-              </Link>
-              <Link 
-                to="/history" 
-                className="text-gray-300 hover:text-white font-medium transition-all duration-300 hover:scale-110 relative group"
-              >
-                History
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
-              </Link>
-              <Link 
-                to="/improve" 
-                className="text-gray-300 hover:text-white font-medium transition-all duration-300 hover:scale-110 relative group"
-              >
-                Improve
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
-              </Link>
-              <button 
-                onClick={handleLogout}
-                className="px-6 py-2 bg-red-500/20 hover:bg-red-500/30 text-white rounded-full backdrop-blur-sm border border-red-400/30 transition-all duration-300 hover:scale-105 font-medium"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <Link 
-                to="/login" 
-                className="text-gray-300 hover:text-white font-medium transition-all duration-300 hover:scale-110 relative group"
-              >
-                Login
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
-              </Link>
-              <Link 
-                to="/register" 
-                className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-105 font-medium"
-              >
-                Register
-              </Link>
-              <Link 
-                to="/practice" 
-                className="text-gray-300 hover:text-white font-medium transition-all duration-300 hover:scale-110 relative group"
-              >
-        
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-400 transition-all duration-300 group-hover:w-full"></span>
-              </Link>
-            </>
-          )}
-        </nav>
-      </header>
-
+      <Header currentPage="Home" />
+     
       {/* Hero Section */}
       <main className="relative z-10 flex flex-1 flex-col items-center justify-center text-center px-6 py-20">
         <div className="max-w-5xl mx-auto space-y-8">

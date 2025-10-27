@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import jsPDF from "jspdf";
+import { generatePracticeSessionPDF } from '../services/pdfGenerator';
+import Header from '../components/Header';
 
 export default function PracticeHistory() {
   const [sessions, setSessions] = useState([]);
@@ -77,18 +78,7 @@ export default function PracticeHistory() {
   };
 
   const downloadPDF = (session) => {
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text("Practice Session Report", 20, 20);
-    doc.setFontSize(12);
-    doc.text(`Date: ${new Date(session.date).toLocaleDateString()}`, 20, 35);
-    doc.text(`Words: ${session.wordCount}`, 20, 45);
-    doc.text(`Sentences: ${session.sentenceCount}`, 20, 55);
-    doc.text("Transcript:", 20, 70);
-    doc.setFontSize(10);
-    const splitTranscript = doc.splitTextToSize(session.transcript, 170);
-    doc.text(splitTranscript, 20, 80);
-    doc.save(`practice-${session.id}.pdf`);
+    generatePracticeSessionPDF(session);
   };
 
   const handleLogout = () => {
@@ -129,45 +119,8 @@ export default function PracticeHistory() {
         <div className="absolute -bottom-32 left-1/3 w-96 h-96 bg-blue-500/10 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{animationDelay: '2s'}}></div>
       </div>
 
-      {/* Navbar */}
-      <header className="relative z-10 flex justify-between items-center px-10 py-6 bg-white/10 backdrop-blur-md border-b border-white/20 shadow-lg">
-        <Link to="/" className="text-3xl font-black text-white flex items-center gap-3 hover:scale-105 transition-transform duration-300">
-          <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" />
-          </svg>
-          <span className="bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-            SpeakUp
-          </span>
-        </Link>
-        <nav className="flex items-center space-x-8">
-          <Link to="/" className="text-white/90 hover:text-white font-medium transition-all duration-300 hover:scale-110 relative group">
-            Home
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
-          </Link>
-          <Link to="/dashboard" className="text-white/90 hover:text-white font-medium transition-all duration-300 hover:scale-110 relative group">
-            Dashboard
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
-          </Link>
-          <Link to="/practice" className="text-white/90 hover:text-white font-medium transition-all duration-300 hover:scale-110 relative group">
-            Practice
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
-          </Link>
-          <Link to="/history" className="text-white font-bold relative group">
-            History
-            <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-white"></span>
-          </Link>
-          <Link to="/improve" className="text-white/90 hover:text-white font-medium transition-all duration-300 hover:scale-110 relative group">
-            Improve
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
-          </Link>
-          <button 
-            onClick={handleLogout}
-            className="px-6 py-2 bg-red-500/20 hover:bg-red-500/30 text-white rounded-full backdrop-blur-sm border border-red-300/30 transition-all duration-300 hover:scale-105 font-medium"
-          >
-            Logout
-          </button>
-        </nav>
-      </header>
+       {/* Header Component */}
+            <Header currentPage="History" />
 
       {/* Main Content */}
       <main className="relative z-10 flex-1 px-10 py-12">
@@ -367,7 +320,7 @@ export default function PracticeHistory() {
 
       {/* Footer */}
       <footer className="relative z-10 text-center py-6 text-white/60 text-sm border-t border-white/10 bg-black/20 backdrop-blur-sm">
-        © {new Date().getFullYear()} SpeakUp. All rights reserved.
+        © {new Date().getFullYear()} Wordup. All rights reserved.
       </footer>
     </div>
   );
