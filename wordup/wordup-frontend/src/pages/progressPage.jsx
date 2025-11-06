@@ -1,57 +1,48 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, BarChart, Bar, Area, AreaChart } from 'recharts';
+import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 
-export default function ProgressPage() {
+export default function AdvancedProgressDashboard() {
   const [progress, setProgress] = useState(null);
-  const [difficultSentences, setDifficultSentences] = useState([]);
+  const [calendar, setCalendar] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('overview'); // overview, sentences, trends
-  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-    
-    fetchProgress();
-    fetchDifficultSentences();
-  }, [navigate]);
+    fetchProgressData();
+    fetchCalendarData();
+  }, []);
 
-  const fetchProgress = async () => {
+  const fetchProgressData = async () => {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:5000/api/progress/overall', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-
       const data = await response.json();
       if (data.success) {
         setProgress(data.progress);
       }
     } catch (error) {
-      console.error('Error fetching progress:', error);
+      console.error('Error:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchDifficultSentences = async () => {
+  const fetchCalendarData = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/progress/difficult-sentences', {
+      const response = await fetch('http://localhost:5000/api/progress/calendar', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-
       const data = await response.json();
       if (data.success) {
-        setDifficultSentences(data.difficultSentences);
+        setCalendar(data.calendar);
       }
     } catch (error) {
-      console.error('Error fetching difficult sentences:', error);
+      console.error('Error:', error);
     }
   };
 
@@ -60,261 +51,470 @@ export default function ProgressPage() {
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-white"></div>
-          <p className="text-white mt-4 text-lg font-semibold">Loading your progress...</p>
+          <p className="text-white mt-4 text-lg font-bold">Loading Progress...</p>
         </div>
       </div>
     );
   }
 
+  if (!progress || progress.totalPractices === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 flex flex-col relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-pink-500/10 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+          <div className="absolute top-40 right-20 w-96 h-96 bg-yellow-500/10 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{animationDelay: '1s'}}></div>
+          <div className="absolute -bottom-32 left-1/3 w-96 h-96 bg-blue-500/10 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{animationDelay: '2s'}}></div>
+        </div>
+
+        {/* Header Component */}
+        <Header currentPage="Progress" />
+
+        {/* Main Content */}
+        <main className="relative z-10 flex-1 flex items-center justify-center p-6">
+          <div className="bg-white rounded-3xl shadow-2xl p-12 max-w-2xl text-center">
+            <div className="text-8xl mb-6">🎤</div>
+            <h2 className="text-4xl font-black text-gray-900 mb-4">Start Your Journey!</h2>
+            <p className="text-xl text-gray-600 mb-8">Complete your first practice to unlock detailed progress tracking</p>
+            <Link
+              to="/practice"
+              className="inline-block px-8 py-4 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-xl hover:from-purple-700 hover:to-violet-700 transition font-bold text-lg shadow-lg"
+            >
+              Start Practicing
+            </Link>
+          </div>
+        </main>
+
+        {/* Footer */}
+        <footer className="relative z-10 text-center py-6 text-white/60 text-sm border-t border-white/10 bg-black/20 backdrop-blur-sm">
+          © {new Date().getFullYear()} Wordup. All rights reserved.
+        </footer>
+      </div>
+    );
+  }
+
+  // Prepare radar chart data
+  const radarData = progress.criteriaProgress ? [
+    {
+      criteria: 'Clarity',
+      current: progress.criteriaProgress.clarity?.current || 0,
+      best: progress.criteriaProgress.clarity?.best || 0,
+      fullMark: 100
+    },
+    {
+      criteria: 'Pace',
+      current: progress.criteriaProgress.pace?.current || 0,
+      best: progress.criteriaProgress.pace?.best || 0,
+      fullMark: 100
+    },
+    {
+      criteria: 'Vocabulary',
+      current: progress.criteriaProgress.vocabulary?.current || 0,
+      best: progress.criteriaProgress.vocabulary?.best || 0,
+      fullMark: 100
+    },
+    {
+      criteria: 'Structure',
+      current: progress.criteriaProgress.structure?.current || 0,
+      best: progress.criteriaProgress.structure?.best || 0,
+      fullMark: 100
+    },
+    {
+      criteria: 'Filler Words',
+      current: progress.criteriaProgress.fillerWords?.current || 0,
+      best: progress.criteriaProgress.fillerWords?.best || 0,
+      fullMark: 100
+    }
+  ] : [];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 flex flex-col relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-pink-500/10 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-yellow-500/10 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute -bottom-32 left-1/3 w-96 h-96 bg-blue-500/10 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{animationDelay: '2s'}}></div>
+      </div>
+
+      {/* Header Component */}
       <Header currentPage="Progress" />
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-5xl font-black text-white mb-3">📊 Your Progress</h1>
-        </div>
+      {/* Main Content */}
+      <main className="relative z-10 flex-1 px-10 py-12">
+        <div className="max-w-7xl mx-auto">
+          {/* Hero Section */}
+          <div className="text-center mb-12">
+            <h1 className="text-5xl font-black text-white mb-4">
+              Progress <span className="bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 bg-clip-text text-transparent">Dashboard</span>
+            </h1>
+            <p className="text-xl text-white/80">Track your journey and celebrate your achievements</p>
+          </div>
 
-        {/* Tabs */}
-        <div className="flex gap-4 mb-8">
-          {['overview', 'sentences', 'trends'].map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-6 py-3 rounded-xl font-bold transition ${
-                activeTab === tab
-                  ? 'bg-white text-purple-600 shadow-xl'
-                  : 'bg-white/10 text-white hover:bg-white/20'
-              }`}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </div>
-
-        {/* Overview Tab */}
-        {activeTab === 'overview' && progress && (
-          <div className="space-y-6">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="bg-white rounded-2xl p-6 shadow-2xl">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="bg-purple-100 rounded-xl p-3">
-                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
+          {/* Improvement Highlight Banner */}
+          {progress.improvement !== 0 && (
+            <div className={`mb-8 rounded-2xl p-6 shadow-2xl ${
+              progress.improvement >= 0 
+                ? 'bg-gradient-to-r from-green-500 to-emerald-500' 
+                : 'bg-gradient-to-r from-orange-500 to-red-500'
+            }`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-white text-lg font-medium mb-1">
+                    {progress.improvement >= 0 ? '🎉 Outstanding Progress!' : '💪 Keep Pushing Forward!'}
+                  </p>
+                  <p className="text-white text-3xl font-black">
+                    {progress.improvement > 0 ? '+' : ''}{progress.improvement} points 
+                    <span className="text-lg font-medium ml-2">
+                      ({progress.improvementPercent > 0 ? '+' : ''}{progress.improvementPercent}%)
+                    </span>
+                  </p>
+                  <p className="text-white/90 text-sm mt-1">
+                    From {progress.firstScore} → {progress.latestScore} since your first practice
+                  </p>
                 </div>
-                <p className="text-4xl font-black text-gray-900 mb-1">{progress.totalPractices}</p>
-                <p className="text-sm text-gray-600 font-medium">Total Practices</p>
+                <div className="text-6xl">
+                  {progress.improvement >= 20 ? '🚀' : progress.improvement >= 10 ? '📈' : progress.improvement >= 0 ? '✨' : '🎯'}
+                </div>
               </div>
+            </div>
+          )}
 
-              <div className="bg-white rounded-2xl p-6 shadow-2xl">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="bg-blue-100 rounded-xl p-3">
-                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
-                  </div>
+          {/* Stats Overview Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+            <div className="bg-white rounded-2xl p-6 shadow-xl hover:scale-105 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="bg-purple-100 rounded-xl p-3">
+                  <span className="text-2xl">🎯</span>
                 </div>
-                <p className="text-4xl font-black text-gray-900 mb-1">{progress.latestScore}</p>
-                <p className="text-sm text-gray-600 font-medium">Latest Score</p>
-              </div>
-
-              <div className="bg-white rounded-2xl p-6 shadow-2xl">
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`rounded-xl p-3 ${progress.improvement >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
-                    <svg className={`w-6 h-6 ${progress.improvement >= 0 ? 'text-green-600' : 'text-red-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
-                  </div>
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">Total Practices</p>
+                  <p className="text-3xl font-black text-gray-900">{progress.totalPractices}</p>
                 </div>
-                <p className={`text-4xl font-black mb-1 ${progress.improvement >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {progress.improvement > 0 ? '+' : ''}{progress.improvement}
-                </p>
-                <p className="text-sm text-gray-600 font-medium">Improvement</p>
-              </div>
-
-              <div className="bg-white rounded-2xl p-6 shadow-2xl">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="bg-orange-100 rounded-xl p-3">
-                    <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                  </div>
-                </div>
-                <p className="text-4xl font-black text-gray-900 mb-1">{progress.difficultSentences?.length || 0}</p>
-                <p className="text-sm text-gray-600 font-medium">Difficult Sentences</p>
               </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="bg-white rounded-2xl p-8 shadow-2xl">
-              <h2 className="text-2xl font-black text-gray-900 mb-6">Quick Actions</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <button
-                  onClick={() => setActiveTab('sentences')}
-                  className="flex items-center gap-4 p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl hover:shadow-lg transition border border-purple-200"
-                >
-                  <div className="bg-purple-600 text-white rounded-lg p-3">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <div className="text-left">
-                    <p className="font-bold text-gray-900">Practice Sentences</p>
-                    <p className="text-sm text-gray-600">Focus on difficult ones</p>
-                  </div>
-                </button>
+            <div className="bg-white rounded-2xl p-6 shadow-xl hover:scale-105 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="bg-blue-100 rounded-xl p-3">
+                  <span className="text-2xl">📈</span>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">Latest Score</p>
+                  <p className="text-3xl font-black text-blue-600">{progress.latestScore}</p>
+                </div>
+              </div>
+            </div>
 
-                <button
-                  onClick={() => setActiveTab('trends')}
-                  className="flex items-center gap-4 p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl hover:shadow-lg transition border border-blue-200"
-                >
-                  <div className="bg-blue-600 text-white rounded-lg p-3">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                  </div>
-                  <div className="text-left">
-                    <p className="font-bold text-gray-900">View Trends</p>
-                    <p className="text-sm text-gray-600">See your improvement</p>
-                  </div>
-                </button>
+            <div className="bg-white rounded-2xl p-6 shadow-xl hover:scale-105 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="bg-yellow-100 rounded-xl p-3">
+                  <span className="text-2xl">🏆</span>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">Best Score</p>
+                  <p className="text-3xl font-black text-yellow-600">{progress.bestScore}</p>
+                </div>
+              </div>
+            </div>
 
-                <Link
-                  to="/practice"
-                  className="flex items-center gap-4 p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl hover:shadow-lg transition border border-green-200"
-                >
-                  <div className="bg-green-600 text-white rounded-lg p-3">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                    </svg>
-                  </div>
-                  <div className="text-left">
-                    <p className="font-bold text-gray-900">New Practice</p>
-                    <p className="text-sm text-gray-600">Start a session</p>
-                  </div>
-                </Link>
+            <div className="bg-white rounded-2xl p-6 shadow-xl hover:scale-105 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-3">
+                <div className={`rounded-xl p-3 ${progress.improvement >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
+                  <span className="text-2xl">{progress.improvement >= 0 ? '🚀' : '💪'}</span>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">Improvement</p>
+                  <p className={`text-3xl font-black ${progress.improvement >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {progress.improvement > 0 ? '+' : ''}{progress.improvement}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow-xl hover:scale-105 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="bg-purple-100 rounded-xl p-3">
+                  <span className="text-2xl">📊</span>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">Average</p>
+                  <p className="text-3xl font-black text-purple-600">{progress.averageScore}</p>
+                </div>
               </div>
             </div>
           </div>
-        )}
 
-        {/* Difficult Sentences Tab */}
-        {activeTab === 'sentences' && (
-          <div className="bg-white rounded-2xl p-8 shadow-2xl">
-            <h2 className="text-2xl font-black text-gray-900 mb-6">⚠️ Difficult Sentences</h2>
-            
-            {difficultSentences.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-gray-400 text-6xl mb-4">🎉</div>
-                <p className="text-gray-700 text-lg font-bold mb-2">No Difficult Sentences!</p>
-                <p className="text-gray-600">You haven't flagged any sentences as difficult yet.</p>
+          {/* Tabs */}
+          <div className="flex gap-3 mb-6 overflow-x-auto pb-2">
+            {['overview', 'criteria', 'trends', 'achievements'].map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-6 py-3 rounded-xl font-bold transition whitespace-nowrap ${
+                  activeTab === tab
+                    ? 'bg-white text-purple-600 shadow-xl'
+                    : 'bg-white/10 text-white hover:bg-white/20'
+                }`}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          {/* OVERVIEW TAB */}
+          {activeTab === 'overview' && (
+            <div className="space-y-6">
+              {/* Overall Progress Line Chart with Area */}
+              <div className="bg-white rounded-2xl p-8 shadow-2xl">
+                <h2 className="text-2xl font-black text-gray-900 mb-6">📈 Your Journey</h2>
+                <ResponsiveContainer width="100%" height={350}>
+                  <AreaChart data={progress.improvementTrend}>
+                    <defs>
+                      <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#9333ea" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="#9333ea" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="practice" label={{ value: 'Practice Session', position: 'insideBottom', offset: -5 }} />
+                    <YAxis domain={[0, 100]} label={{ value: 'Score', angle: -90, position: 'insideLeft' }} />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'white', 
+                        border: '2px solid #9333ea', 
+                        borderRadius: '8px', 
+                        fontWeight: 'bold' 
+                      }}
+                      formatter={(value) => [`${value}`, 'Score']}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="score" 
+                      stroke="#9333ea" 
+                      strokeWidth={3}
+                      fillOpacity={1} 
+                      fill="url(#colorScore)"
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="score" 
+                      stroke="#9333ea" 
+                      strokeWidth={3} 
+                      dot={{ fill: '#9333ea', r: 5 }} 
+                      activeDot={{ r: 7 }}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+                
+                {/* Progress Insights */}
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                    <p className="text-sm text-gray-600 mb-1">First Practice</p>
+                    <p className="text-2xl font-black text-gray-900">{progress.firstScore}</p>
+                  </div>
+                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                    <p className="text-sm text-gray-600 mb-1">Current Level</p>
+                    <p className="text-2xl font-black text-gray-900">{progress.latestScore}</p>
+                  </div>
+                  <div className={`rounded-lg p-4 border ${
+                    progress.improvement >= 0 
+                      ? 'bg-green-50 border-green-200' 
+                      : 'bg-orange-50 border-orange-200'
+                  }`}>
+                    <p className="text-sm text-gray-600 mb-1">Total Growth</p>
+                    <p className={`text-2xl font-black ${
+                      progress.improvement >= 0 ? 'text-green-600' : 'text-orange-600'
+                    }`}>
+                      {progress.improvement > 0 ? '+' : ''}{progress.improvement} pts
+                    </p>
+                  </div>
+                </div>
               </div>
-            ) : (
-              <div className="space-y-4">
-                {difficultSentences.map((sentence, idx) => (
-                  <div
-                    key={idx}
-                    className="p-6 border-2 border-gray-200 rounded-xl hover:border-purple-300 hover:shadow-lg transition"
-                  >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <p className="text-lg font-bold text-gray-900 mb-2">"{sentence.text}"</p>
-                        <p className="text-sm text-gray-600">From: <span className="font-semibold">{sentence.speechTitle}</span></p>
-                      </div>
-                      <span className="bg-orange-100 text-orange-700 text-xs font-bold px-3 py-1 rounded-full">
-                        {sentence.attempts} attempts
-                      </span>
-                    </div>
 
-                    <div className="grid grid-cols-3 gap-4 mb-4">
-                      <div className="bg-blue-50 rounded-lg p-3">
-                        <p className="text-sm text-gray-600">Best Score</p>
-                        <p className="text-2xl font-black text-blue-600">{sentence.bestScore}</p>
+              {/* Radar Chart - Skills Overview */}
+              {progress.criteriaProgress && (
+                <div className="bg-white rounded-2xl p-8 shadow-2xl">
+                  <h2 className="text-2xl font-black text-gray-900 mb-6">🎯 Skills Profile</h2>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <RadarChart data={radarData}>
+                      <PolarGrid stroke="#e5e7eb" />
+                      <PolarAngleAxis dataKey="criteria" tick={{ fill: '#374151', fontWeight: 'bold' }} />
+                      <PolarRadiusAxis angle={90} domain={[0, 100]} />
+                      <Radar name="Current" dataKey="current" stroke="#9333ea" fill="#9333ea" fillOpacity={0.6} />
+                      <Radar name="Best" dataKey="best" stroke="#10b981" fill="#10b981" fillOpacity={0.3} />
+                      <Legend />
+                      <Tooltip contentStyle={{ backgroundColor: 'white', border: '2px solid #9333ea', borderRadius: '8px', fontWeight: 'bold' }} />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+
+              {/* Practice Calendar Heatmap */}
+              <div className="bg-white rounded-2xl p-8 shadow-2xl">
+                <h2 className="text-2xl font-black text-gray-900 mb-6">📅 Practice Calendar</h2>
+                <div className="grid grid-cols-7 gap-2">
+                  {calendar.map((day, idx) => (
+                    <div
+                      key={idx}
+                      className="aspect-square rounded-lg transition-transform hover:scale-110 cursor-pointer"
+                      style={{
+                        backgroundColor: day.count === 0 ? '#f3f4f6' : 
+                          day.avgScore >= 80 ? '#10b981' :
+                          day.avgScore >= 60 ? '#fbbf24' : '#ef4444',
+                        opacity: day.count === 0 ? 0.3 : 0.6 + (day.count * 0.1)
+                      }}
+                      title={`${day.date}: ${day.count} practice(s), Avg: ${day.avgScore}`}
+                    />
+                  ))}
+                </div>
+                <div className="flex items-center gap-6 mt-6 text-sm text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-gray-200 rounded"></div>
+                    <span>No practice</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-red-500 rounded"></div>
+                    <span>&lt;60</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-yellow-500 rounded"></div>
+                    <span>60-79</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-green-500 rounded"></div>
+                    <span>80+</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* CRITERIA TAB */}
+          {activeTab === 'criteria' && progress.criteriaProgress && (
+            <div className="space-y-6">
+              {Object.entries(progress.criteriaProgress).map(([name, data]) => (
+                <div key={name} className="bg-white rounded-2xl p-8 shadow-2xl">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-black text-gray-900 capitalize">{name}</h2>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className="text-sm text-gray-600">Current</p>
+                        <p className="text-3xl font-black text-purple-600">{data.current}</p>
                       </div>
-                      <div className="bg-purple-50 rounded-lg p-3">
-                        <p className="text-sm text-gray-600">Last Score</p>
-                        <p className="text-2xl font-black text-purple-600">{sentence.lastScore}</p>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-600">Best</p>
+                        <p className="text-3xl font-black text-green-600">{data.best}</p>
                       </div>
-                      <div className="bg-green-50 rounded-lg p-3">
-                        <p className="text-sm text-gray-600">Average</p>
-                        <p className="text-2xl font-black text-green-600">
-                          {Math.round(sentence.scores.reduce((a, b) => a + b, 0) / sentence.scores.length)}
+                      <div className="text-right">
+                        <p className="text-sm text-gray-600">Improvement</p>
+                        <p className={`text-3xl font-black ${data.improvement >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {data.improvement > 0 ? '+' : ''}{data.improvement}
                         </p>
                       </div>
                     </div>
+                  </div>
 
-                    {sentence.notes && (
-                      <div className="bg-yellow-50 rounded-lg p-3 mb-4 border-l-4 border-yellow-400">
-                        <p className="text-sm text-gray-700"><strong>Notes:</strong> {sentence.notes}</p>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <LineChart data={data.trend}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                      <XAxis dataKey="practice" />
+                      <YAxis domain={[0, 100]} />
+                      <Tooltip contentStyle={{ backgroundColor: 'white', border: '2px solid #9333ea', borderRadius: '8px', fontWeight: 'bold' }} />
+                      <Line type="monotone" dataKey="score" stroke="#9333ea" strokeWidth={3} dot={{ fill: '#9333ea', r: 4 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+
+                  {/* Improvement indicator */}
+                  {data.improvement !== 0 && (
+                    <div className={`mt-4 p-4 rounded-lg ${
+                      data.improvement >= 0 ? 'bg-green-50 border border-green-200' : 'bg-orange-50 border border-orange-200'
+                    }`}>
+                      <p className={`font-bold text-sm ${data.improvement >= 0 ? 'text-green-700' : 'text-orange-700'}`}>
+                        {data.improvement >= 0 
+                          ? `✨ You've improved by ${data.improvement} points in ${name}!`
+                          : `💪 Focus on ${name} to improve your overall score`
+                        }
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* TRENDS TAB */}
+          {activeTab === 'trends' && (
+            <div className="space-y-6">
+              {/* Words Per Minute Trend */}
+              {progress.metricsTrends?.wordsPerMinute && (
+                <div className="bg-white rounded-2xl p-8 shadow-2xl">
+                  <h2 className="text-2xl font-black text-gray-900 mb-6">🗣️ Words Per Minute</h2>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={progress.metricsTrends.wordsPerMinute}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                      <XAxis dataKey="practice" />
+                      <YAxis />
+                      <Tooltip contentStyle={{ backgroundColor: 'white', border: '2px solid #3b82f6', borderRadius: '8px', fontWeight: 'bold' }} />
+                      <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={3} dot={{ fill: '#3b82f6', r: 5 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+
+              {/* Filler Words Trend */}
+              {progress.metricsTrends?.fillerWordCount && (
+                <div className="bg-white rounded-2xl p-8 shadow-2xl">
+                  <h2 className="text-2xl font-black text-gray-900 mb-6">⚠️ Filler Words Trend</h2>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={progress.metricsTrends.fillerWordCount}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                      <XAxis dataKey="practice" />
+                      <YAxis />
+                      <Tooltip contentStyle={{ backgroundColor: 'white', border: '2px solid #f59e0b', borderRadius: '8px', fontWeight: 'bold' }} />
+                      <Bar dataKey="value" fill="#f59e0b" radius={[8, 8, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ACHIEVEMENTS TAB */}
+          {activeTab === 'achievements' && progress.achievements && (
+            <div className="bg-white rounded-2xl p-8 shadow-2xl">
+              <h2 className="text-2xl font-black text-gray-900 mb-6">🏆 Achievements</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {progress.achievements.map((achievement) => (
+                  <div
+                    key={achievement.id}
+                    className={`p-6 rounded-xl border-2 transition ${
+                      achievement.unlocked
+                        ? 'bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-300 shadow-lg'
+                        : 'bg-gray-50 border-gray-200 opacity-50'
+                    }`}
+                  >
+                    <div className="text-5xl mb-3 text-center">{achievement.icon}</div>
+                    <h3 className="text-xl font-black text-gray-900 text-center mb-2">{achievement.title}</h3>
+                    <p className="text-sm text-gray-600 text-center">{achievement.description}</p>
+                    {achievement.unlocked && (
+                      <div className="mt-4 text-center">
+                        <span className="inline-block bg-yellow-100 text-yellow-700 text-xs font-bold px-3 py-1 rounded-full">
+                          Unlocked!
+                        </span>
                       </div>
                     )}
-
-                    <div className="flex gap-2">
-                      <Link
-                        to="/practice"
-                        state={{ 
-                          targetSentence: sentence.text,
-                          speechId: sentence.speechId 
-                        }}
-                        className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-lg hover:from-purple-700 hover:to-violet-700 transition font-semibold text-center"
-                      >
-                        Practice This Sentence
-                      </Link>
-                      <Link
-                        to={`/speeches/${sentence.speechId}`}
-                        className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-semibold"
-                      >
-                        View Speech
-                      </Link>
-                    </div>
                   </div>
                 ))}
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
+      </main>
 
-        {/* Trends Tab */}
-        {activeTab === 'trends' && progress && (
-          <div className="bg-white rounded-2xl p-8 shadow-2xl">
-            <h2 className="text-2xl font-black text-gray-900 mb-6">📈 Improvement Trends</h2>
-            
-            {progress.improvementTrend && progress.improvementTrend.length > 0 ? (
-              <ResponsiveContainer width="100%" height={400}>
-                <LineChart data={progress.improvementTrend}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="practice" label={{ value: 'Practice Session', position: 'insideBottom', offset: -5 }} />
-                  <YAxis label={{ value: 'Score', angle: -90, position: 'insideLeft' }} domain={[0, 100]} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'white', 
-                      border: '2px solid #9333ea',
-                      borderRadius: '8px',
-                      fontWeight: 'bold'
-                    }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="score" 
-                    stroke="#9333ea" 
-                    strokeWidth={3}
-                    dot={{ fill: '#9333ea', r: 6 }}
-                    activeDot={{ r: 8 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-gray-600">Not enough data to show trends. Keep practicing!</p>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      {/* Footer */}
+      <footer className="relative z-10 text-center py-6 text-white/60 text-sm border-t border-white/10 bg-black/20 backdrop-blur-sm">
+        © {new Date().getFullYear()} Wordup. All rights reserved.
+      </footer>
     </div>
   );
 }

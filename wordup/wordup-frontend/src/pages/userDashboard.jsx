@@ -70,6 +70,25 @@ export default function UserDashboard() {
     }
   };
 
+  const [sessions, setSessions] = useState([]);
+
+useEffect(() => {
+  fetchSessions();
+}, []);
+
+const fetchSessions = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await fetch("http://localhost:5000/api/practice/history", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await response.json();
+    if (data.success) setSessions(data.sessions);
+  } catch (err) {
+    console.error("Error fetching sessions:", err);
+  }
+};
+
   const practiceCount = speeches.reduce((sum, speech) => sum + speech.practiceCount, 0);
   const totalSpeeches = speeches.length;
 
@@ -252,11 +271,14 @@ export default function UserDashboard() {
         {/* Progress Stats Component */}
         <ProgressStats />
 
-        {/* Recent Practiced Speeches - Only shows speeches that have been practiced */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
+        {/* Recent Sessions */}
+        <div className="bg-white rounded-2xl shadow-2xl p-8 mt-8">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-2xl font-black text-gray-900">Recent Speeches</h3>
-            <Link to="/speeches" className="text-purple-600 hover:text-purple-700 font-bold text-sm flex items-center gap-1">
+            <h3 className="text-2xl font-black text-gray-900">Recent Sessions</h3>
+            <Link
+              to="/history"
+              className="text-purple-600 hover:text-purple-700 font-bold text-sm flex items-center gap-1 hover:gap-2 transition-all"
+            >
               View All
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -267,73 +289,65 @@ export default function UserDashboard() {
           {loading ? (
             <div className="text-center py-12">
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-              <p className="text-gray-600 mt-4 font-medium">Loading your speeches...</p>
+              <p className="text-gray-600 mt-4 font-medium">Loading your sessions...</p>
             </div>
           ) : error ? (
             <div className="text-center py-12">
               <div className="text-red-500 text-5xl mb-4">⚠</div>
               <p className="text-red-500 font-semibold">{error}</p>
             </div>
-          ) : recentPracticedSpeeches.length === 0 ? (
+          ) : sessions.length === 0 ? (
             <div className="text-center py-16">
               <div className="text-gray-400 text-6xl mb-4">🎤</div>
-              <p className="text-gray-700 text-lg mb-2 font-bold">No Practiced Speeches Yet</p>
-              <p className="text-gray-600 mb-6">Practice your speeches to see them appear here!</p>
+              <p className="text-gray-700 text-lg mb-2 font-bold">No Practice Sessions Yet</p>
+              <p className="text-gray-600 mb-6">Start practicing to see your sessions appear here!</p>
               <Link
-                to="/speeches"
+                to="/practice"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-full hover:from-purple-700 hover:to-violet-700 transition font-bold shadow-xl hover:shadow-2xl hover:scale-105"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
-                Go to Saved Speeches
+                Start Practicing
               </Link>
             </div>
           ) : (
-            <div className="space-y-4">
-              {recentPracticedSpeeches.map((speech) => (
+            <div className="space-y-3">
+              {sessions.slice(0, 5).map((session) => (
                 <div
-                  key={speech._id}
-                  className="flex items-start justify-between p-5 border border-gray-200 rounded-xl hover:border-purple-300 hover:shadow-md transition-all bg-white"
+                  key={session.id}
+                  className="flex items-center justify-between p-5 border border-gray-200 rounded-xl hover:border-purple-300 hover:shadow-md transition-all bg-white"
                 >
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h4 className="font-bold text-gray-900 text-lg">{speech.title}</h4>
-                      <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold">
-                        {speech.practiceCount} practice{speech.practiceCount !== 1 ? 's' : ''}
-                      </span>
-                    </div>
+                    <h4 className="font-bold text-gray-900 text-lg mb-1">
+                      {new Date(session.date).toLocaleDateString()} — {new Date(session.date).toLocaleTimeString()}
+                    </h4>
                     <div className="flex items-center gap-4 text-sm text-gray-600">
                       <span className="flex items-center gap-1">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4" />
                         </svg>
-                        {new Date(speech.createdAt).toLocaleDateString()}
+                        {session.wordCount} words
                       </span>
-                      <span className="flex items-center gap-1 text-purple-600">
+                      <span className="flex items-center gap-1">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6" />
                         </svg>
-                        Last practiced: {new Date(speech.lastPracticedAt).toLocaleDateString()}
+                        {session.sentenceCount} sentences
                       </span>
                     </div>
                   </div>
+
                   <div className="flex gap-2 ml-4">
                     <Link
-                      to={`/speeches/${speech._id}`}
+                      to="/history"
+                      state={{ sessionId: session.id }}
                       className="px-5 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-semibold text-sm"
                     >
                       View
                     </Link>
-                    <Link
-                      to="/practice"
-                      state={{ preloadedSpeech: speech.improvedVersion || speech.originalDraft, speechId: speech._id }}
-                      className="px-5 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold text-sm"
-                    >
-                      Practice
-                    </Link>
-                    <button 
-                      onClick={() => downloadPDF(speech)}
+                    <button
+                      onClick={() => downloadPDF(session)}
                       className="px-5 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition font-semibold text-sm"
                     >
                       PDF

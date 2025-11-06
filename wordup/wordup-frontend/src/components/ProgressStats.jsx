@@ -111,9 +111,9 @@ export default function ProgressStats() {
       {/* Additional Stats */}
       <div className="mt-6 pt-6 border-t border-gray-200">
         <div className="space-y-2 text-sm text-gray-600">
-          <p>📊 Average Score: <span className="font-bold text-gray-800">{stats.averageScore}/100</span></p>
-          <p>📝 Total Words Spoken: <span className="font-bold text-gray-800">{stats.totalWords.toLocaleString()}</span></p>
-          <p>⚠️ Avg Filler Words: <span className="font-bold text-gray-800">{stats.avgFillerWords}</span></p>
+          <p>📊 Average Score: <span className="font-bold text-gray-800">{stats.averageScore || 0}/100</span></p>
+          <p>📝 Total Words Spoken: <span className="font-bold text-gray-800">{(stats.totalWords || 0).toLocaleString()}</span></p>
+          <p>⚠️ Avg Filler Words: <span className="font-bold text-gray-800">{stats.avgFillerWords || 0}</span></p>
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Header from '../components/Header';
 
 export default function SpeechImprover() {
@@ -14,24 +14,64 @@ export default function SpeechImprover() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [analysisType, setAnalysisType] = useState("full");
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingSpeechId, setEditingSpeechId] = useState(null);
+  
+  // New states to track changes
+  const [lastSavedTitle, setLastSavedTitle] = useState("");
+  const [lastSavedDraft, setLastSavedDraft] = useState("");
+  const [lastSavedImproved, setLastSavedImproved] = useState("");
+  const [lastSavedSuggestions, setLastSavedSuggestions] = useState("");
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
   const navigate = useNavigate();
+  const location = useLocation();
 
   const analysisOptions = [
-    { value: "full", label: "🎯 Full Analysis", icon: "✨" },
-    { value: "grammar", label: "📝 Grammar Corrections", icon: "✏️" },
-    { value: "vocabulary", label: "📚 Vocabulary Enhancement", icon: "💡" },
-    { value: "academic", label: "🎓 Academic Tone", icon: "🎓" },
-    { value: "conversational", label: "💬 Conversational", icon: "💬" },
-    { value: "persuasive", label: "🎤 Persuasive Style", icon: "🔥" },
-    { value: "concise", label: "⚡ Make Concise", icon: "✂️" },
-    { value: "formal", label: "👔 Formal Business", icon: "💼" }
+    { value: "full", label: "Full Analysis", icon: "📊" },
+    { value: "grammar", label: "Grammar Corrections", icon: "✍️" },
+    { value: "vocabulary", label: "Vocabulary Enhancement", icon: "📚" },
+    { value: "academic", label: "Academic Tone", icon: "🎓" },
+    { value: "conversational", label: "Conversational", icon: "💬" },
+    { value: "persuasive", label: "Persuasive Style", icon: "🎯" },
+    { value: "concise", label: "Make Concise", icon: "✂️" },
+    { value: "formal", label: "Formal Business", icon: "💼" }
   ];
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     setIsLoggedIn(!!token);
-  }, []);
+
+    // Check if we're in edit mode
+    if (location.state?.editSpeech) {
+      const speech = location.state.editSpeech;
+      setTitle(speech.title);
+      setOriginalDraft(speech.originalDraft);
+      setImprovedVersion(speech.improvedVersion || "");
+      setAiSuggestions(speech.aiSuggestions || "");
+      setIsEditMode(true);
+      setEditingSpeechId(speech._id);
+      setSavedSpeechId(speech._id);
+      setIsSaved(true);
+      
+      // Set last saved values
+      setLastSavedTitle(speech.title);
+      setLastSavedDraft(speech.originalDraft);
+      setLastSavedImproved(speech.improvedVersion || "");
+      setLastSavedSuggestions(speech.aiSuggestions || "");
+      setHasUnsavedChanges(false);
+    }
+  }, [location.state]);
+
+  // Check for changes whenever title, draft, or AI results change
+  useEffect(() => {
+    const titleChanged = title !== lastSavedTitle;
+    const draftChanged = originalDraft !== lastSavedDraft;
+    const improvedChanged = improvedVersion !== lastSavedImproved;
+    const suggestionsChanged = aiSuggestions !== lastSavedSuggestions;
+    
+    setHasUnsavedChanges(titleChanged || draftChanged || improvedChanged || suggestionsChanged);
+  }, [title, originalDraft, improvedVersion, aiSuggestions, lastSavedTitle, lastSavedDraft, lastSavedImproved, lastSavedSuggestions]);
 
   const getAnalysisPrompt = () => {
     const prompts = {
@@ -235,7 +275,7 @@ Use professional vocabulary, formal structure, business-appropriate language.`
 
     setLoading(true);
     setError("");
-    setAiSuggestions("🤖 AI is analyzing your speech...");
+    setAiSuggestions("AI is analyzing your speech...");
 
     try {
       const COHERE_API_KEY = "vZ6eRMVEtY8tSCzkqepuPoMPznKZlFvHFm4JUsYE";
@@ -260,6 +300,9 @@ Use professional vocabulary, formal structure, business-appropriate language.`
 
       setAiSuggestions(data.text);
       setImprovedVersion(data.text);
+      
+      // Mark as having unsaved changes since AI results changed
+      setHasUnsavedChanges(true);
 
     } catch (err) {
       console.error("AI Analysis error:", err);
@@ -276,6 +319,13 @@ Use professional vocabulary, formal structure, business-appropriate language.`
       return;
     }
 
+    // Check if there are no changes
+    if (!hasUnsavedChanges && isSaved) {
+      setError("No changes detected. Please modify your speech before saving again.");
+      setTimeout(() => setError(""), 3000);
+      return;
+    }
+
     setLoading(true);
     setError("");
 
@@ -288,8 +338,14 @@ Use professional vocabulary, formal structure, business-appropriate language.`
         return;
       }
 
-      const response = await fetch('http://localhost:5000/speech', {
-        method: 'POST',
+      const url = isEditMode && editingSpeechId 
+        ? `http://localhost:5000/speech/${editingSpeechId}`
+        : 'http://localhost:5000/speech';
+      
+      const method = isEditMode && editingSpeechId ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method: method,
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -318,6 +374,17 @@ Use professional vocabulary, formal structure, business-appropriate language.`
       setSavedSpeechId(data.speech._id);
       setIsSaved(true);
       
+      // Update last saved values
+      setLastSavedTitle(title);
+      setLastSavedDraft(originalDraft);
+      setLastSavedImproved(improvedVersion);
+      setLastSavedSuggestions(aiSuggestions);
+      setHasUnsavedChanges(false);
+      
+      if (isEditMode) {
+        setEditingSpeechId(data.speech._id);
+      }
+      
       setTimeout(() => setSuccess(false), 3000);
 
     } catch (err) {
@@ -328,48 +395,36 @@ Use professional vocabulary, formal structure, business-appropriate language.`
     }
   };
 
-  // ✅ Helper function to extract ONLY the enhanced script
-  const extractEnhancedScript = (aiResponse) => {
-    if (!aiResponse) return null;
-    
-    // Try to extract the enhanced/improved version from different formats
-    const versionPatterns = [
-      /(?:IMPROVED|ENHANCED|CORRECTED|ACADEMIC|CONVERSATIONAL|PERSUASIVE|CONCISE|FORMAL)\s+VERSION:\s*\n([\s\S]*?)(?:\n\n[A-Z\s]+:|$)/i,
-      /(?:IMPROVED|ENHANCED|CORRECTED|ACADEMIC|CONVERSATIONAL|PERSUASIVE|CONCISE|FORMAL)\s+VERSION:\s*([\s\S]*?)(?:\n\n[A-Z\s]+:|$)/i
-    ];
-
-    for (const pattern of versionPatterns) {
-      const match = aiResponse.match(pattern);
-      if (match && match[1]) {
-        return match[1].trim();
-      }
-    }
-
-    // Pattern 2: If no clear version marker, take everything before the first section header
-    const firstSectionMatch = aiResponse.match(/^([\s\S]*?)(?:\n\n[A-Z\s]+:|$)/);
-    if (firstSectionMatch && firstSectionMatch[1]) {
-      const content = firstSectionMatch[1].trim();
-      if (content.length > 50) {
-        return content;
-      }
-    }
-
-    // Fallback: return the original response
-    return aiResponse;
+  const reAnalyze = () => {
+    setAiSuggestions("");
+    setImprovedVersion("");
+    setSuccess(false);
+    setError("");
+    // Mark as having changes since we cleared the analysis
+    setHasUnsavedChanges(true);
   };
 
-  // ✅ UPDATED: Extract only enhanced script before navigating
-  const practiceNow = () => {
-    const enhancedScript = extractEnhancedScript(improvedVersion || aiSuggestions);
-    
-    navigate('/practice', { 
-      state: { 
-        preloadedSpeech: enhancedScript,
-        speechId: savedSpeechId,
-        title: title || "Your Speech"
-      } 
-    });
+  const cancelEdit = () => {
+    setTitle("");
+    setOriginalDraft("");
+    setImprovedVersion("");
+    setAiSuggestions("");
+    setIsEditMode(false);
+    setEditingSpeechId(null);
+    setIsSaved(false);
+    setSavedSpeechId(null);
+    setError("");
+    setSuccess(false);
+    setLastSavedTitle("");
+    setLastSavedDraft("");
+    setLastSavedImproved("");
+    setLastSavedSuggestions("");
+    setHasUnsavedChanges(false);
+    navigate('/speeches');
   };
+
+  // Determine if save button should be disabled
+  const isSaveDisabled = loading || !title.trim() || !originalDraft.trim() || (!hasUnsavedChanges && isSaved);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 relative overflow-hidden">
@@ -383,16 +438,62 @@ Use professional vocabulary, formal structure, business-appropriate language.`
 
       <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-80px)] px-4 py-8">
         <div className="w-full max-w-5xl bg-white rounded-3xl shadow-2xl p-10">
+          <div className="flex gap-3 mb-6">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-semibold"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back to Home
+            </Link>
+            <Link
+              to="/speeches"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition font-semibold shadow-md"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
+              </svg>
+              Go to Saved Speeches
+            </Link>
+            {isEditMode && (
+              <button
+                onClick={cancelEdit}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition font-semibold ml-auto"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Cancel Edit
+              </button>
+            )}
+          </div>
+
           <div className="text-center mb-8">
             <h2 className="text-5xl font-black text-gray-900 mb-3">
               <span className="bg-gradient-to-r from-purple-600 to-violet-600 bg-clip-text text-transparent">
-                Create Speech
+                {isEditMode ? 'Edit Speech' : 'Create Speech'}
               </span>
             </h2>
             <p className="text-gray-600 text-lg">
-              Write your speech draft and get AI-powered suggestions to improve it
+              {isEditMode 
+                ? 'Update your speech draft and re-analyze if needed'
+                : 'Write your speech draft and get AI-powered suggestions to improve it'
+              }
             </p>
           </div>
+
+          {hasUnsavedChanges && isSaved && (
+            <div className="mb-6 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-xl">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                <p className="text-yellow-700 font-semibold">⚠️ You have unsaved changes</p>
+              </div>
+            </div>
+          )}
 
           <div className="mb-6">
             <label className="block text-gray-800 font-bold mb-2 flex items-center gap-2">
@@ -406,8 +507,7 @@ Use professional vocabulary, formal structure, business-appropriate language.`
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g., My Speech About Climate Change"
-              disabled={isSaved}
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
             />
           </div>
 
@@ -421,22 +521,21 @@ Use professional vocabulary, formal structure, business-appropriate language.`
             <select
               value={analysisType}
               onChange={(e) => setAnalysisType(e.target.value)}
-              disabled={isSaved}
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white font-medium text-gray-700 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white font-medium text-gray-700"
             >
               {analysisOptions.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
             </select>
             <p className="text-sm text-gray-500 mt-2">
-              {analysisType === 'full' && '✨ Complete analysis with improvements, strengths, suggestions'}
-              {analysisType === 'grammar' && '✏️ Focus on fixing grammar errors and punctuation'}
-              {analysisType === 'vocabulary' && '💡 Upgrade vocabulary with sophisticated words'}
-              {analysisType === 'academic' && '🎓 Transform into formal academic style'}
-              {analysisType === 'conversational' && '💬 Make natural and engaging'}
-              {analysisType === 'persuasive' && '🔥 Add persuasive techniques'}
-              {analysisType === 'concise' && '✂️ Remove redundancy, make shorter'}
-              {analysisType === 'formal' && '💼 Professional business style'}
+              {analysisType === 'full' && 'Complete analysis with improvements, strengths, suggestions'}
+              {analysisType === 'grammar' && 'Focus on fixing grammar errors and punctuation'}
+              {analysisType === 'vocabulary' && 'Upgrade vocabulary with sophisticated words'}
+              {analysisType === 'academic' && 'Transform into formal academic style'}
+              {analysisType === 'conversational' && 'Make natural and engaging'}
+              {analysisType === 'persuasive' && 'Add persuasive techniques'}
+              {analysisType === 'concise' && 'Remove redundancy, make shorter'}
+              {analysisType === 'formal' && 'Professional business style'}
             </p>
           </div>
 
@@ -452,8 +551,7 @@ Use professional vocabulary, formal structure, business-appropriate language.`
               onChange={(e) => setOriginalDraft(e.target.value)}
               placeholder="Paste or type your speech here..."
               rows="10"
-              disabled={isSaved}
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none transition-all"
             />
             <div className="flex items-center justify-between mt-2">
               <p className="text-sm text-gray-600 font-medium">
@@ -462,17 +560,17 @@ Use professional vocabulary, formal structure, business-appropriate language.`
             </div>
           </div>
 
-          {!aiSuggestions && !isSaved && (
+          {!aiSuggestions && (
             <div className="flex gap-4 mb-6">
               <button
                 onClick={saveSpeech}
-                disabled={loading || !title.trim() || !originalDraft.trim()}
+                disabled={isSaveDisabled}
                 className="flex-1 px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl shadow-xl hover:from-green-600 hover:to-emerald-600 transition-all text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] transform disabled:transform-none flex items-center justify-center gap-2"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
                 </svg>
-                Save Speech
+                {isEditMode ? 'Update Speech' : 'Save Speech'}
               </button>
 
               <button
@@ -500,7 +598,7 @@ Use professional vocabulary, formal structure, business-appropriate language.`
             </div>
           )}
 
-          {isSaved && !aiSuggestions && (
+          {isSaved && !aiSuggestions && !isEditMode && !hasUnsavedChanges && (
             <div className="mb-6 p-5 bg-green-50 border-2 border-green-200 rounded-xl flex items-center justify-center gap-3">
               <svg className="w-7 h-7 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -526,21 +624,25 @@ Use professional vocabulary, formal structure, business-appropriate language.`
                 <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                <p className="text-green-600 font-semibold">Speech saved successfully!</p>
+                <p className="text-green-600 font-semibold">
+                  {isEditMode ? 'Speech updated successfully!' : 'Speech saved successfully!'}
+                </p>
               </div>
             </div>
           )}
 
           {aiSuggestions && (
             <div className="mb-6">
-              <div className="flex items-center gap-2 mb-3">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-                <h3 className="text-xl font-black text-gray-900">AI Analysis & Suggestions</h3>
-                <span className="ml-auto px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold">
-                  {analysisOptions.find(o => o.value === analysisType)?.icon}
-                </span>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                  <h3 className="text-xl font-black text-gray-900">AI Analysis & Suggestions</h3>
+                  <span className="ml-2 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold">
+                    {analysisOptions.find(o => o.value === analysisType)?.icon}
+                  </span>
+                </div>
               </div>
               <pre className="p-6 bg-gradient-to-br from-purple-50 to-violet-50 rounded-2xl text-gray-700 shadow-inner min-h-[200px] whitespace-pre-wrap font-sans text-sm overflow-auto max-h-[500px] border-2 border-purple-200 leading-relaxed">
                 {aiSuggestions}
@@ -548,30 +650,28 @@ Use professional vocabulary, formal structure, business-appropriate language.`
             </div>
           )}
 
-          {aiSuggestions && !loading && !isSaved && (
+          {aiSuggestions && !loading && (
             <div className="flex gap-4">
-              <button onClick={saveSpeech} className="flex-1 px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl shadow-xl hover:from-green-600 hover:to-emerald-600 transition-all text-lg font-bold hover:scale-[1.02] transform flex items-center justify-center gap-2">
+              <button 
+                onClick={saveSpeech} 
+                disabled={isSaveDisabled}
+                className="flex-1 px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl shadow-xl hover:from-green-600 hover:to-emerald-600 transition-all text-lg font-bold hover:scale-[1.02] transform flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
                 </svg>
-                Save Speech
+                {loading ? 'Saving...' : isEditMode ? 'Update Speech' : 'Save Speech'}
               </button>
-              <button onClick={practiceNow} className="flex-1 px-6 py-4 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-xl shadow-xl hover:from-purple-700 hover:to-violet-700 transition-all text-lg font-bold hover:scale-[1.02] transform flex items-center justify-center gap-2">
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
+              <button 
+                onClick={reAnalyze} 
+                className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl shadow-xl hover:from-blue-600 hover:to-cyan-600 transition-all text-lg font-bold hover:scale-[1.02] transform flex items-center justify-center gap-2"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                Practice Now
+                Re-analyze
               </button>
             </div>
-          )}
-
-          {isSaved && !aiSuggestions && savedSpeechId && (
-            <button onClick={practiceNow} className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-xl shadow-xl hover:from-purple-700 hover:to-violet-700 transition-all text-lg font-bold hover:scale-[1.02] transform flex items-center justify-center gap-2">
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
-              </svg>
-              Practice Now
-            </button>
           )}
         </div>
       </div>
