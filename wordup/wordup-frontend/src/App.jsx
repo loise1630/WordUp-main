@@ -9,6 +9,7 @@ import AdminDashboard from "./pages/adminDashboard";
 import SpeechDetail from './pages/speechDetail';
 import SavedSpeeches from './pages/savedSpeeches';
 import PracticeHistory from "./pages/practiceHistory";
+import ProgressPage from './pages/progressPage';
 
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
       <Route path="/admin" element={<AdminDashboard />} /> 
       <Route path="/speeches/:id" element={<SpeechDetail />} />
       <Route path="/speeches" element={<SavedSpeeches />} />
+      <Route path="/progress" element={<ProgressPage />} />
     </Routes>
   );
 }

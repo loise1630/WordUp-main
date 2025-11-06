@@ -7,6 +7,7 @@ import Header from '../components/Header';
 export default function UserDashboard() {
   const [user, setUser] = useState(null);
   const [speeches, setSpeeches] = useState([]);
+  const [recentPracticedSpeeches, setRecentPracticedSpeeches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   
@@ -49,6 +50,14 @@ export default function UserDashboard() {
 
       if (data.success) {
         setSpeeches(data.speeches);
+        
+        // ✅ FIXED: Only show speeches that have been practiced (have lastPracticedAt)
+        const practicedSpeeches = data.speeches
+          .filter(speech => speech.lastPracticedAt) // Only practiced speeches
+          .sort((a, b) => new Date(b.lastPracticedAt) - new Date(a.lastPracticedAt))
+          .slice(0, 5); // Get top 5 most recently practiced
+        
+        setRecentPracticedSpeeches(practicedSpeeches);
       } else {
         setError('Failed to load speeches');
       }
@@ -63,7 +72,6 @@ export default function UserDashboard() {
 
   const practiceCount = speeches.reduce((sum, speech) => sum + speech.practiceCount, 0);
   const totalSpeeches = speeches.length;
-  const recentSpeeches = speeches.slice(0, 5);
 
   const downloadPDF = (speech) => {
     generateSpeechPDF(speech, user?.name);
@@ -153,12 +161,12 @@ export default function UserDashboard() {
           <h3 className="text-2xl font-black text-gray-900 mb-6">
             Quick Actions
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <Link
               to="/improve"
               className="group relative bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300 hover:scale-105 border border-purple-200"
             >
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col items-center text-center gap-3">
                 <div className="bg-purple-600 text-white rounded-lg p-3 group-hover:scale-110 transition-transform">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -175,7 +183,7 @@ export default function UserDashboard() {
               to="/practice"
               className="group relative bg-gradient-to-br from-violet-50 to-violet-100 rounded-xl p-6 hover:shadow-xl hover:shadow-violet-500/20 transition-all duration-300 hover:scale-105 border border-violet-200"
             >
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col items-center text-center gap-3">
                 <div className="bg-violet-600 text-white rounded-lg p-3 group-hover:scale-110 transition-transform">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
@@ -192,7 +200,7 @@ export default function UserDashboard() {
               to="/history"
               className="group relative bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-6 hover:shadow-xl hover:shadow-indigo-500/20 transition-all duration-300 hover:scale-105 border border-indigo-200"
             >
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col items-center text-center gap-3">
                 <div className="bg-indigo-600 text-white rounded-lg p-3 group-hover:scale-110 transition-transform">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -209,7 +217,7 @@ export default function UserDashboard() {
               to="/speeches"
               className="group relative bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl p-6 hover:shadow-xl hover:shadow-pink-500/20 transition-all duration-300 hover:scale-105 border border-pink-200"
             >
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col items-center text-center gap-3">
                 <div className="bg-pink-600 text-white rounded-lg p-3 group-hover:scale-110 transition-transform">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -221,19 +229,34 @@ export default function UserDashboard() {
                 </div>
               </div>
             </Link>
+
+            <Link
+              to="/progress"
+              className="group relative bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-6 hover:shadow-xl hover:shadow-emerald-500/20 transition-all duration-300 hover:scale-105 border border-emerald-200"
+            >
+              <div className="flex flex-col items-center text-center gap-3">
+                <div className="bg-emerald-600 text-white rounded-lg p-3 group-hover:scale-110 transition-transform">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-bold text-gray-900">Progress</p>
+                  <p className="text-sm text-gray-600">Track improvement</p>
+                </div>
+              </div>
+            </Link>
           </div>
         </div>
 
         {/* Progress Stats Component */}
         <ProgressStats />
 
-        {/* Recent Speeches */}
+        {/* Recent Practiced Speeches - Only shows speeches that have been practiced */}
         <div className="bg-white rounded-2xl shadow-2xl p-8">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-2xl font-black text-gray-900">
-              Recent Speeches
-            </h3>
-            <Link to="/speeches" className="text-purple-600 hover:text-purple-700 font-bold text-sm flex items-center gap-1 hover:gap-2 transition-all">
+            <h3 className="text-2xl font-black text-gray-900">Recent Speeches</h3>
+            <Link to="/speeches" className="text-purple-600 hover:text-purple-700 font-bold text-sm flex items-center gap-1">
               View All
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -251,30 +274,35 @@ export default function UserDashboard() {
               <div className="text-red-500 text-5xl mb-4">⚠</div>
               <p className="text-red-500 font-semibold">{error}</p>
             </div>
-          ) : recentSpeeches.length === 0 ? (
+          ) : recentPracticedSpeeches.length === 0 ? (
             <div className="text-center py-16">
-              <div className="text-gray-400 text-6xl mb-4">📝</div>
-              <p className="text-gray-700 text-lg mb-2 font-bold">Start Your Journey</p>
-              <p className="text-gray-600 mb-6">Create your first speech and begin improving your English fluency</p>
+              <div className="text-gray-400 text-6xl mb-4">🎤</div>
+              <p className="text-gray-700 text-lg mb-2 font-bold">No Practiced Speeches Yet</p>
+              <p className="text-gray-600 mb-6">Practice your speeches to see them appear here!</p>
               <Link
-                to="/improve"
+                to="/speeches"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-full hover:from-purple-700 hover:to-violet-700 transition font-bold shadow-xl hover:shadow-2xl hover:scale-105"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
-                Create Your First Speech
+                Go to Saved Speeches
               </Link>
             </div>
           ) : (
-            <div className="space-y-3">
-              {recentSpeeches.map((speech) => (
+            <div className="space-y-4">
+              {recentPracticedSpeeches.map((speech) => (
                 <div
                   key={speech._id}
-                  className="group flex items-center justify-between p-5 border-2 border-gray-100 rounded-xl hover:border-purple-300 hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-white to-gray-50"
+                  className="flex items-start justify-between p-5 border border-gray-200 rounded-xl hover:border-purple-300 hover:shadow-md transition-all bg-white"
                 >
                   <div className="flex-1">
-                    <h4 className="font-bold text-gray-900 mb-1 text-lg group-hover:text-purple-600 transition">{speech.title}</h4>
+                    <div className="flex items-center gap-3 mb-2">
+                      <h4 className="font-bold text-gray-900 text-lg">{speech.title}</h4>
+                      <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold">
+                        {speech.practiceCount} practice{speech.practiceCount !== 1 ? 's' : ''}
+                      </span>
+                    </div>
                     <div className="flex items-center gap-4 text-sm text-gray-600">
                       <span className="flex items-center gap-1">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -282,31 +310,31 @@ export default function UserDashboard() {
                         </svg>
                         {new Date(speech.createdAt).toLocaleDateString()}
                       </span>
-                      <span className="flex items-center gap-1">
+                      <span className="flex items-center gap-1 text-purple-600">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        {speech.practiceCount} practice{speech.practiceCount !== 1 ? 's' : ''}
+                        Last practiced: {new Date(speech.lastPracticedAt).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 ml-4">
                     <Link
                       to={`/speeches/${speech._id}`}
-                      className="px-5 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-semibold"
+                      className="px-5 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-semibold text-sm"
                     >
                       View
                     </Link>
                     <Link
                       to="/practice"
                       state={{ preloadedSpeech: speech.improvedVersion || speech.originalDraft, speechId: speech._id }}
-                      className="px-5 py-2 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-lg hover:from-purple-700 hover:to-violet-700 transition font-semibold shadow-md"
+                      className="px-5 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold text-sm"
                     >
                       Practice
                     </Link>
                     <button 
                       onClick={() => downloadPDF(speech)}
-                      className="px-5 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition font-semibold"
+                      className="px-5 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition font-semibold text-sm"
                     >
                       PDF
                     </button>

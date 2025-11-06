@@ -8,6 +8,8 @@ import speechRoutes from "./routes/speechRoutes.js";
 import audioRoutes from "./routes/audioRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import practiceRoutes from './routes/practiceRoutes.js';
+import progressRoutes from './routes/progressRoutes.js';
+
 
 dotenv.config();
 
@@ -39,6 +41,9 @@ console.log('  ✓ Admin routes: /admin');
 app.use('/api/practice', practiceRoutes);
 console.log('  ✓ Practice routes: /api/practice');
 console.log('✅ All routes registered!\n');
+app.use('/api/progress', progressRoutes);
+console.log('  ✓ Progress routes: /api/progress');
+
 
 // Root route
 app.get("/", (req, res) => {

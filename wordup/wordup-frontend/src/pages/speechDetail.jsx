@@ -44,11 +44,43 @@ export default function SpeechDetail() {
     }
   };
 
+  // ✅ Helper function to extract ONLY the enhanced script
+  const extractEnhancedScript = (aiResponse) => {
+    if (!aiResponse) return null;
+    
+    // Try to extract the enhanced/improved version from different formats
+    const versionPatterns = [
+      /(?:IMPROVED|ENHANCED|CORRECTED|ACADEMIC|CONVERSATIONAL|PERSUASIVE|CONCISE|FORMAL)\s+VERSION:\s*\n([\s\S]*?)(?:\n\n[A-Z\s]+:|$)/i,
+      /(?:IMPROVED|ENHANCED|CORRECTED|ACADEMIC|CONVERSATIONAL|PERSUASIVE|CONCISE|FORMAL)\s+VERSION:\s*([\s\S]*?)(?:\n\n[A-Z\s]+:|$)/i
+    ];
+
+    for (const pattern of versionPatterns) {
+      const match = aiResponse.match(pattern);
+      if (match && match[1]) {
+        return match[1].trim();
+      }
+    }
+
+    const firstSectionMatch = aiResponse.match(/^([\s\S]*?)(?:\n\n[A-Z\s]+:|$)/);
+    if (firstSectionMatch && firstSectionMatch[1]) {
+      const content = firstSectionMatch[1].trim();
+      if (content.length > 50) {
+        return content;
+      }
+    }
+
+    return aiResponse;
+  };
+
+  // ✅ UPDATED: Extract only enhanced script before navigating
   const practiceNow = () => {
+    const enhancedScript = extractEnhancedScript(speech.improvedVersion) || speech.originalDraft;
+    
     navigate('/practice', {
       state: {
-        preloadedSpeech: speech.improvedVersion || speech.originalDraft,
-        speechId: speech._id
+        preloadedSpeech: enhancedScript,
+        speechId: speech._id,
+        title: speech.title
       }
     });
   };

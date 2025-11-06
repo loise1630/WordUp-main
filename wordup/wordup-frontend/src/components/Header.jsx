@@ -21,10 +21,12 @@ export default function Header({ currentPage = "" }) {
     navigate("/login");
   };
 
+  // 🟣 Added Progress here inside dropdownLinks
   const dropdownLinks = [
     { path: "/", label: "Home" },
     { path: "/dashboard", label: "Dashboard" },
     { path: "/history", label: "History" },
+    { path: "/progress", label: "Progress" }, // ✅ New Progress link
   ];
 
   const sideLinks = [
@@ -47,7 +49,7 @@ export default function Header({ currentPage = "" }) {
     setTimeout(() => {
       setIsMenuOpen(false);
       setIsClosing(false);
-    }, 150); // smooth fade-out
+    }, 150);
   };
 
   const toggleMenu = () => {
@@ -112,13 +114,10 @@ export default function Header({ currentPage = "" }) {
                   />
                 </button>
 
-                {/* Dropdown content */}
                 {isMenuOpen && (
                   <div
                     className={`absolute right-0 mt-2 w-56 bg-gray-900/95 backdrop-blur-md border border-white/20 rounded-xl shadow-2xl overflow-hidden z-50 transform transition-all duration-200 ${
-                      isClosing
-                        ? "opacity-0 scale-95"
-                        : "opacity-100 scale-100"
+                      isClosing ? "opacity-0 scale-95" : "opacity-100 scale-100"
                     }`}
                   >
                     <div className="py-2">

@@ -24,7 +24,7 @@ export default function ProgressComparison({ speechId, isOpen, onClose }) {
       if (data.success) {
         const practices = data.practices || [];
         
-        // Format data for chart
+        
         const chartData = practices.map((practice, index) => ({
           name: `Practice ${index + 1}`,
           date: new Date(practice.createdAt).toLocaleDateString(),
@@ -35,7 +35,6 @@ export default function ProgressComparison({ speechId, isOpen, onClose }) {
 
         setPracticeHistory(chartData);
 
-        // Calculate stats
         if (practices.length > 0) {
           const scores = practices.map(p => p.score);
           const firstScore = scores[0];
@@ -67,7 +66,6 @@ export default function ProgressComparison({ speechId, isOpen, onClose }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
         <div className="bg-gradient-to-r from-purple-600 to-violet-600 p-6 rounded-t-2xl text-white flex justify-between items-center">
           <div>
             <h2 className="text-3xl font-black mb-2">📊 Progress Comparison</h2>
@@ -97,7 +95,6 @@ export default function ProgressComparison({ speechId, isOpen, onClose }) {
             </div>
           ) : (
             <>
-              {/* Stats Grid */}
               {stats && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                   <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200">
@@ -139,7 +136,6 @@ export default function ProgressComparison({ speechId, isOpen, onClose }) {
                 </div>
               )}
 
-              {/* Score Trend Chart */}
               <div className="bg-gray-50 rounded-xl p-6 mb-6">
                 <h3 className="text-xl font-black text-gray-900 mb-4">Score Trend</h3>
                 <ResponsiveContainer width="100%" height={300}>
@@ -169,7 +165,6 @@ export default function ProgressComparison({ speechId, isOpen, onClose }) {
                 </ResponsiveContainer>
               </div>
 
-              {/* Practice History Table */}
               <div className="bg-gray-50 rounded-xl p-6">
                 <h3 className="text-xl font-black text-gray-900 mb-4">Practice History</h3>
                 <div className="space-y-2">
@@ -215,8 +210,7 @@ export default function ProgressComparison({ speechId, isOpen, onClose }) {
                   ))}
                 </div>
               </div>
-
-              {/* Insights */}
+              
               {stats && stats.totalPractices > 1 && (
                 <div className="mt-6 bg-gradient-to-r from-purple-50 to-violet-50 rounded-xl p-6 border border-purple-200">
                   <h3 className="text-lg font-black text-gray-900 mb-3">💡 Insights</h3>
